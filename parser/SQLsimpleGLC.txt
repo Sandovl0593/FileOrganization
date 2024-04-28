@@ -1,0 +1,39 @@
+sentence -> (create-sent | select-sent | insert-sent | using-index-sent | delete-sent) more-sentence
+more-sentence -> ';' sentence | ϵ
+
+----
+create-sent -> 'create table' table 'from file' string 'using index' type-index '("' campo '")'
+type-index -> hash | btree
+
+----
+select-sent -> 'select' atributes 'from' table ('where' condition | ϵ)
+
+atributes -> atribute | '*'
+atribute -> campo | more-campo
+more-campo -> ',' atribute | ϵ
+
+condition -> (between-cond | filter-cond) more-condition
+more-condition -> bool-op condition | ϵ
+bool-op -> 'and' | 'or'
+
+between-cond -> campo 'between' value 'and' value
+
+filter-cond -> campo comp-op value
+comp-op -> '>' | '<' | '<=' | '>=' | '='
+
+----
+insert-sent -> 'insert into' table 'values (' values ')'
+values -> value more-value
+more-value -> ',' value | ϵ
+
+----
+campo -> [tokens de los campos de records]
+table -> [tokens de las tablas]
+value -> number | '"' string
+
+integer -> num nums decimal
+decimal -> '.' num nums | ϵ
+nums -> num | ϵ
+
+string -> letter more-string
+more-string -> string | '"'
