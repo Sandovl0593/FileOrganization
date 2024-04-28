@@ -1,6 +1,6 @@
 #include <fstream>
 #include <vector>
-#include "record_seq.h"
+#include "record_seq.hpp"
 
 #define AUXILIAR_SIZE 20
 
