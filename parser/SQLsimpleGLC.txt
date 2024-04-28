@@ -1,39 +1,31 @@
-sentence -> (create-sent | select-sent | insert-sent | using-index-sent | delete-sent) more-sentence
-more-sentence -> ';' sentence | ϵ
+sentence ::= (create-sent | select-sent | insert-sent  | delete-sent) ";"
 
 ----
-create-sent -> 'create table' table 'from file' string 'using index' type-index '("' campo '")'
-type-index -> hash | btree
+create-sent ::= "create" "table" table "from" "file" string using-index-sent 
+
+using-index-sent ::= "using" "index" type-index "(" value ")"
+
+type-index ::= hash | btree
 
 ----
-select-sent -> 'select' atributes 'from' table ('where' condition | ϵ)
+select-sent ::= "select" atributes "from" id  condition?
 
-atributes -> atribute | '*'
-atribute -> campo | more-campo
-more-campo -> ',' atribute | ϵ
+atributes ::=  id ("," id)* | "*"
 
-condition -> (between-cond | filter-cond) more-condition
-more-condition -> bool-op condition | ϵ
-bool-op -> 'and' | 'or'
+condition ::= "where" (between-cond | filter-cond)
+bool-op ::= "and" | "or"
 
-between-cond -> campo 'between' value 'and' value
+between-cond ::= id "between" value "and" value
 
-filter-cond -> campo comp-op value
-comp-op -> '>' | '<' | '<=' | '>=' | '='
+filter-cond ::= id comp-op value
+comp-op ::= ">" | "<" | "<=" | ">=" | "="
 
 ----
-insert-sent -> 'insert into' table 'values (' values ')'
-values -> value more-value
-more-value -> ',' value | ϵ
+insert-sent ::= "insert" "into" id "values" "(" values ")"
+values ::= value ("," value)*
 
 ----
-campo -> [tokens de los campos de records]
-table -> [tokens de las tablas]
-value -> number | '"' string
+delete-sent ::= "delete" "from" id condition
 
-integer -> num nums decimal
-decimal -> '.' num nums | ϵ
-nums -> num | ϵ
-
-string -> letter more-string
-more-string -> string | '"'
+----
+value ::= number | string
