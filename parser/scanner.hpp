@@ -8,6 +8,7 @@
 class Scanner {
 public:
   Scanner();
+  Scanner(string in_s);
   Scanner(const char* in_s);
   Token* nextToken();
   void resetScanner();
@@ -17,6 +18,7 @@ private:
   string input;
   int first, current;
   unordered_map<string, Token::Type> reserved;
+  void init_reserved();
   char nextChar();
   void rollBack();
   void startLexema();
@@ -24,10 +26,9 @@ private:
   Token::Type checkReserved(string lexema);
 };
 
-Scanner::Scanner(): input(""), first(0), current(0) {}
-
-Scanner::Scanner(const char* in_s): input(in_s), first(0), current(0) {
+void Scanner::init_reserved() {
   reserved["create"] = Token::CREATE;
+  reserved["delete"] = Token::DELETE;
   reserved["table"] = Token::TABLE;
   reserved["insert"] = Token::INSERT;
   reserved["into"] = Token::INTO;
@@ -40,9 +41,22 @@ Scanner::Scanner(const char* in_s): input(in_s), first(0), current(0) {
   reserved["values"] = Token::VALUES;
   reserved["hash"] = Token::HASH;
   reserved["btree"] = Token::BTREE;
+  reserved["seq"] = Token::SEQ;
   reserved["and"] = Token::AND;
   reserved["or"] = Token::OR;
   reserved["between"] = Token::BETWEEN;
+}
+
+Scanner::Scanner(): input(""), first(0), current(0) {
+  init_reserved();
+}
+
+Scanner::Scanner(string in_s): input(in_s), first(0), current(0) {
+  init_reserved();
+}
+
+Scanner::Scanner(const char* in_s): input(in_s), first(0), current(0) {
+  init_reserved();
 }
 
 void Scanner::setInput(const char* new_s) {
@@ -69,7 +83,20 @@ Token* Scanner::nextToken() {
   if (c == '\0') return new Token(Token::END);
   startLexema();
 
-  if (isdigit(c)) {
+  if (c == '\'') {
+    c = nextChar();
+    while (c != '\'')  c = nextChar();
+    string lex = getLexema();
+    token = new Token(Token::STRING, lex.substr(1,lex.size()-2));
+  }
+  else if (c == '\"') {
+    c = nextChar();
+    while (c != '\"')  c = nextChar();
+    string lex = getLexema();
+    token = new Token(Token::STRING, lex.substr(1,lex.size()-2));
+  }
+
+  else if (isdigit(c)) {
     c = nextChar();
     while (isdigit(c)) c = nextChar();
 
@@ -98,43 +125,18 @@ Token* Scanner::nextToken() {
     if (ttype != Token::ERR) {
       token = new Token(ttype);
     } else {
-      token = new Token(Token::ERR, c);
+      token = new Token(Token::ID, getLexema());
     }
   } 
   
-  else if (strchr("*(),;\'\"<>=", c)) {
+  else if (strchr("*(),;<>=", c)) {
     switch(c) {
       case '(': token = new Token(Token::LPAREN); break;
       case ')': token = new Token(Token::RPAREN); break;
-      case '*': token = new Token(Token::ALL,c); break;
-      case ',': token = new Token(Token::COMMA,c); break;
-      case ';': token = new Token(Token::PTCOMMA,c); break;
-      case '=': token = new Token(Token::EQUAL,c); break;
-
-      case '\'': 
-        c = nextChar();
-        while (c != '\'') {
-          if (c == '\0') {
-            token = new Token(Token::ERR, c);  return token;
-          }
-          c = nextChar();
-        }
-        rollBack();
-        token = new Token(Token::STRING, getLexema());
-        break;
-
-      case '\"': 
-        c = nextChar();
-        while (c != '\'') {
-          if (c == '\0') {
-            token = new Token(Token::ERR, c);  return token;
-          }
-          c = nextChar();
-        }
-        rollBack();
-        token = new Token(Token::STRING, getLexema());
-        break;
-
+      case '*': token = new Token(Token::ALL); break;
+      case ',': token = new Token(Token::COMMA); break;
+      case ';': token = new Token(Token::PTCOMMA); break;
+      case '=': token = new Token(Token::EQUAL); break;
       case '<':
         c = nextChar();
         if (c == '=')
@@ -158,6 +160,7 @@ Token* Scanner::nextToken() {
   } else {
     token = new Token(Token::ERR, c);
   }
+  cout << "next token " << token << endl;
   return token;
 }
 

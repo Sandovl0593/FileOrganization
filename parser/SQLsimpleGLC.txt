@@ -1,31 +1,26 @@
-sentence ::= (create-sent | select-sent | insert-sent  | delete-sent) ";"
+sentence ::= ("create" create-sent | "select" select-sent | "insert" insert-sent | "delete" delete-sent) ";"
 
 ----
-create-sent ::= "create" "table" table "from" "file" string using-index-sent 
-
-using-index-sent ::= "using" "index" type-index "(" value ")"
+create-sent ::= "table" table "from" "file" string "using" "index" type-index "(" value ")" 
 
 type-index ::= hash | btree
 
 ----
-select-sent ::= "select" atributes "from" id  condition?
+select-sent ::= atributes "from" table "where" condition?
 
 atributes ::=  id ("," id)* | "*"
 
-condition ::= "where" (between-cond | filter-cond)
+condition ::= id ("betwwen" value "and" value | comp-op value)
 bool-op ::= "and" | "or"
 
-between-cond ::= id "between" value "and" value
-
-filter-cond ::= id comp-op value
 comp-op ::= ">" | "<" | "<=" | ">=" | "="
 
 ----
-insert-sent ::= "insert" "into" id "values" "(" values ")"
+insert-sent ::= "into" table "values" "(" values ")"
 values ::= value ("," value)*
 
 ----
-delete-sent ::= "delete" "from" id condition
+delete-sent ::= "from" table "where" condition
 
 ----
 value ::= number | string

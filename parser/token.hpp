@@ -9,14 +9,14 @@ public:
                 CREATE, TABLE, INSERT, INTO, USING, INDEX, DELETE,
                 SELECT, FROM, WHERE,
                 FILE, VALUES,
-                HASH, BTREE,
+                HASH, BTREE, SEQ,
                 AND, OR, BETWEEN,
                 LESS, GREATER, LESSEQUAL, GREATEREQUAL, EQUAL,
                 COMMA, PTCOMMA,
                 ALL, 
                 ID, NUM, FLOAT, STRING,
-                END, ERR };
-    static const char* token_names[38];
+                ERR, END };
+    static const char* token_names[34];
     Type type;
     string lexema;
     Token(Type);
@@ -24,20 +24,18 @@ public:
     Token(Type, const string source);
 };
 
-const char* Token::token_names[38] = 
+const char* Token::token_names[34] = 
               { "LPAREN", "RPAREN", 
                 "CREATE", "TABLE", "INSERT", "INTO", "USING", "INDEX", "DELETE",
                 "SELECT", "FROM", "WHERE", 
                 "FILE", "VALUES",
-                "HASH", "BTREE",
+                "HASH", "BTREE", "SEQ",
                 "AND", "OR", "BETWEEN",
                 "LESS", "GREATER", "LESSEQUAL", "GREATEREQUAL", "EQUAL",
                 "COMMA", "PTCOMMA",
                 "ALL", 
-                /* TOKENS DE TABLAS */
-                /* TOKENS DE CAMPOS */
-                "ID", "NUM", "FLOAT" "STRING",
-                "END", "ERR" };
+                "ID", "NUM", "FLOAT", "STRING",
+                "ERR", "END" };
 
 Token::Token(Type type):type(type) { lexema = ""; }
 
