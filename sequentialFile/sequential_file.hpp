@@ -162,38 +162,39 @@ public:
 
     vector<T> search(Key key) {
         fstream file(this->datfile, ios::in | ios::binary);
-        vector<T> results;
+        vector<T> records;
 
-        T result;
+        T record;
         int p = 1, down = size_dat() - 1, mid;
 
         while (down >= p) {
             mid = (p + down) / 2;
             file.seekg(sizeof(T) * mid, ios::beg);
-            file.read((char*)&result, sizeof(T));
-            if (result > key) {
+            file.read((char*)&record, sizeof(T));
+            // binary search
+            if (record > key) {
                 down = mid - 1;
-            } else if (result < key) {
+            } else if (record < key) {
                 p = mid + 1;
             } else {
-                results.push_back(result);
+                records.push_back(record);
 
+                // records, with same key, stay in adjacent lines
+                // -> read in two for loops (to up and to down)
                 for (int i = mid - 1; i >= p; i--) {
                     file.seekg(sizeof(T) * i, ios::beg);
-                    file.read((char*)&result, sizeof(T));
-                    if (result == key) 
-                        results.push_back(result);
-                     else 
-                        break;
+                    file.read((char*)&record, sizeof(T));
+                    if (record == key) 
+                        records.push_back(record);
+                     else break;
                 }
 
                 for (int i = mid + 1; i <= down; i++) {
                     file.seekg(sizeof(T) * i, ios::beg);
-                    file.read((char*)&result, sizeof(T));
-                    if (result == key) 
-                        results.push_back(result);
-                     else 
-                        break;
+                    file.read((char*)&record, sizeof(T));
+                    if (record == key) 
+                        records.push_back(record);
+                     else break;
                 }
                 break;
             }
@@ -201,17 +202,18 @@ public:
 
         file.close();
 
-        if (results.empty()) {
+        if (records.empty()) {
+            // si no existe en el file, do linear search in aux file
             fstream auxFile(this->auxfile, ios::in | ios::binary);
-            while (auxFile.read((char*)&result, sizeof(T))) {
-                if (result == key) {
-                    results.push_back(result);
+            while (auxFile.read((char*)&record, sizeof(T))) {
+                if (record == key) {
+                    records.push_back(record);
                 }
             }
             auxFile.close();
         }
 
-        return results;
+        return records;
     }
 
     vector<T> range_search(Key k_begin, Key k_end) {
@@ -219,63 +221,48 @@ public:
         fstream file(this->datfile, ios::in | ios::binary | ios::out);
         fstream aux(this->auxfile, ios::in | ios::binary | ios::out);
 
-        if (!file.is_open() || !aux.is_open()) return result;
-
-        T header;
-
+        T current;
+        // read header
         file.seekg(0, ios::beg);
-        file.read((char *)&header, sizeof(header));
+        file.read((char *)&current, sizeof(current));
 
-        int pos = header.next;
-        char archivo = header.archivo;
+        int cur_pos = current.nextDel;
+        char cur_char = current.nextFileChar;
 
-        if (archivo == 'd') {
-            T current;
-            file.seekg(pos * sizeof(T), ios::beg);
+        // if first pointer to 'd' -> to datfile
+        if (cur_char == 'd') {
+            // cursor to cur_pos -> read current
+            file.seekg(cur_pos * sizeof(T), ios::beg);
             file.read((char *)&current, sizeof(current));
-            while (current < k_end || current == k_end) {  //a <= k_end
-           
-                if (current > k_begin || current == k_begin) //a >= k_begin
-                    result.push_back(current); 
-                
-                if (current.nextDel == -1) break;
-                
-                if (current.nextFileChar == 'a') {
-                    aux.seekg(current.nextDel * sizeof(T), ios::beg);
-                    aux.read((char *)&current, sizeof(current));
-                }
-                else {
-                    file.seekg(current.nextDel * sizeof(T), ios::beg);
-                    file.read((char *)&current, sizeof(current));
-                }
-            }
-            file.close();
-            aux.close();
-            return result;
         }
         else {
-            T current;
-            aux.seekg(pos * sizeof(T), ios::beg);
+            // c.c. -> to the auxfile
+            aux.seekg(cur_pos * sizeof(T), ios::beg);
             aux.read((char *)&current, sizeof(current));
-            while (current < k_end || current == k_end) { //a <= k_end
-                if (current > k_begin || current == k_begin) //a >= k_begin
-                    result.push_back(current); 
-                
-                if (current.nextDel == -1) break;
-                
-                if (current.nextFileChar == 'a') {
-                    aux.seekg(current.nextDel * sizeof(T), ios::beg);
-                    aux.read((char *)&current, sizeof(current));
-                }
-                else {
-                    file.seekg(current.nextDel * sizeof(T), ios::beg);
-                    file.read((char *)&current, sizeof(current));
-                }
-            }
-            file.close();
-            aux.close();
-            return result;
         }
+
+        // loop for matching keys in current reads
+        while (current < k_end || current == k_end) {  //a <= k_end
+       
+            if (current > k_begin || current == k_begin) //a >= k_begin
+                result.push_back(current); 
+            
+            if (current.nextDel == -1) break;
+            
+            // si el sgte es 'a' -> read en el auxfile 
+            if (current.nextFileChar == 'a') {
+                aux.seekg(current.nextDel * sizeof(T), ios::beg);
+                aux.read((char *)&current, sizeof(current));
+            }
+            else {
+                // c.c. en el datfile
+                file.seekg(current.nextDel * sizeof(T), ios::beg);
+                file.read((char *)&current, sizeof(current));
+            }
+        }
+        file.close();
+        aux.close();
+        return result;
     }
 
     ~SequentialFile() {
