@@ -270,8 +270,7 @@ bool Parser::parseSelectSent() {
         // ejecuta la seleccion
         return true;
     }
-    throwParser("Parser error - se espera WHERE");
-    return false;
+    return true;
 }
 
 bool Parser::parseSentence() {
