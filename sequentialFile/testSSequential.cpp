@@ -18,8 +18,18 @@ int main() {
     seq.printFile('d');
     cout << "---" << endl;
     seq.printFile('a');
-    cout << "---" << endl;
+    // cout << "--- rebuild" << endl;
     // vector<Record> s = seq.search("renzo");
-    vector<Record> s2 = seq.range_search("camila", "raul");
-    for (auto &r: s2) cout << r << endl;
+    // vector<Record> s2 = seq.range_search("camila", "raul");
+    // for (auto &r: s2) cout << r << endl;
+    // seq.rebuild();
+    // cout << "---" << endl;
+    // seq.printFile('d');
+    cout << "--- remove " << endl;
+    seq.remove("gilberto");
+    seq.remove("albina");
+    cout << "---" << endl;
+    seq.printFile('d');
+    cout << "---" << endl;
+    seq.printFile('a');
 }
