@@ -6,6 +6,8 @@
 
 using namespace std;
 
+
+
 template <typename Key, typename T>
 class SequentialFile {
     string datfile;
@@ -17,24 +19,29 @@ public:
         this->datfile = datFilename;
         this->auxfile = auxFilename;
         ofstream file;
-        file.open(datFilename);
+        file.open(datFilename, ios::binary);
         file.close();
-        file.open(auxFilename);
+        file.open(auxFilename, ios::binary);
+        file.close();
+
+        file.open("metadata.dat", ios::binary);
+        int basesize = 0;
+        file.write((char*)&basesize, sizeof(int));  // datfile
+        file.write((char*)&basesize, sizeof(int));  // auxfile
         file.close();
     };
 
-    void printFile(char fileChar) {
-        ifstream file;
-        if (fileChar == 'a')
-            file.open(this->auxfile, ios::in | ios::binary);
-        else if (fileChar == 'd')
-            file.open(this->datfile, ios::in | ios::binary);
-
+    void printFile() {
+        ifstream file(this->datfile, ios::binary);
         T record;
-        while (file.read((char*)&record, sizeof(T))) {
-            if (record.nextDel != -2)
-                cout << record << endl;
+        file.read((char*) &record, sizeof(T));
+        do {
+            cout << record << endl;
+            record = readRecord(record.nextDel, record.nextFileChar);
         }
+        while (record.nextDel != -1);
+        cout << record << endl;
+        
         file.close();
     }
 
@@ -56,70 +63,89 @@ public:
 
 
     int size_dat() {
-        ifstream file(this->datfile, ios::binary);
-        T record; int size = 0;
-        while (file.read((char*)&record, sizeof(T))) {
-            if (record.nextDel != -2)
-                ++size;
-        }
+        ifstream file("metadata.dat", ios::binary);
+        int size;
+        file.seekg(0, ios::beg);
+        file.read((char*)&size, sizeof(int));  // datfile
         file.close();
         return size;
     }
 
     int size_aux() {
-        ifstream file(this->auxfile, ios::binary);
-        T record; int size = 0;
-        while (file.read((char*)&record, sizeof(T))) {
-            if (record.nextDel != -2)
-                ++size;
-        }
+        ifstream file("metadata.dat", ios::binary);
+        int size;
+        file.seekg(sizeof(int), ios::beg);
+        file.read((char*)&size, sizeof(int));  // auxfile
         file.close();
         return size;
     }
 
+    void updateSize(char fileChar, int rec) {
+        fstream file("metadata.dat", ios::in | ios::out | ios::binary);
+        int currentsize;
+
+        // cursor for read
+        if (fileChar == 'd')
+            file.seekg(0, ios::beg);
+        else if (fileChar == 'a')
+            file.seekg(sizeof(int), ios::beg);
+        file.read((char*)&currentsize, sizeof(int));
+        
+        currentsize += rec; // update
+
+        // cursor for write
+        if (fileChar == 'd')
+            file.seekp(0, ios::beg);
+        else if (fileChar == 'a')
+            file.seekp(sizeof(int), ios::beg);
+        file.write((char*)&currentsize, sizeof(int));  // auxfile
+        file.close();
+    }
 
     void rebuild() {
-        cout << "-- rebuild" << endl;
+        cout << "--- rebuild" << endl;
         vector<T> records;
         fstream file(this->datfile, ios::in | ios::out | ios::binary);
-        fstream aux(this->auxfile, ios::in | ios::out | ios::binary);
 
         // start header
         T record;
         file.read((char*)&record, sizeof(T));
-        char fileChar = record.nextFileChar;
-        int pos = record.nextDel, aux_pos = 1;
+        char next_char = record.nextFileChar;
+        int next_pos = record.nextDel, aux_pos = 1;
 
         record.nextDel = aux_pos++; record.nextFileChar = 'd';
         records.push_back(record);
 
-        while (pos != -1) {
+        while (next_pos != -1) {
             // read next record
-            record = readRecord(pos, fileChar);
+            record = readRecord(next_pos, next_char);
             // updated next current record pointers
-            fileChar = record.nextFileChar;
-            pos = record.nextDel;
-            if (pos < 0) record.nextDel = aux_pos++;
+            next_char = record.nextFileChar;
+            next_pos = record.nextDel;
+            if (next_pos != -1) record.nextDel = aux_pos++;
             record.nextFileChar = 'd';
             records.push_back(record);
         }
 
         file.close();
-        aux.close();
 
         // trunc aux file
-        ofstream aux2(this->auxfile, ios::trunc | ios::binary);
-        aux2.close();
+        ofstream aux(this->auxfile, ios::trunc | ios::binary);
+        aux.close();
 
         ofstream file2(this->datfile, ios::trunc | ios::binary);
         file2.seekp(0, ios::beg);
         for (auto &r: records)
             file2.write((char*) &r, sizeof(T));
         file2.close();
+
+        int sizeAux = size_aux();
+        updateSize('d', sizeAux);
+        updateSize('a', -sizeAux);
     }
 
 
-     void insert(T record) {
+     void insertRecord(T record) {
         fstream file(this->datfile, ios::in | ios::out | ios::binary);
 
         if (size_dat() == 0) {
@@ -132,6 +158,8 @@ public:
             // insert record to end cursor
             file.write((char *)&record, sizeof(record));
             file.close();
+
+            updateSize('d', 1);
         }
         else {
             fstream aux(this->auxfile, ios::in | ios::out | ios::binary);
@@ -142,7 +170,7 @@ public:
             
             // // start file
             file.seekg(0, ios::beg);
-            file.read((char *)&next_record, sizeof(cur_record));
+            file.read((char *)&next_record, sizeof(T));
 
              while (record > next_record) {   
                 cur_record = next_record;
@@ -159,7 +187,8 @@ public:
             // actualiza el input al sgte del cur_record     
             //    BEFORE (cur record --> next record)
             //    NOW    (cur record --> input record -> next record )
-            cur_record.nextDel = size_aux();
+            aux.seekp(0, ios::end);
+            cur_record.nextDel = aux.tellp() / sizeof(T);
             cur_record.nextFileChar = 'a';
             record.nextDel = cur_next;
             record.nextFileChar = cur_nextChar;
@@ -178,107 +207,76 @@ public:
             aux.close();
             file.close();
 
-            if (size_aux() == MAX_AUXFILE_SIZE) 
+            updateSize('a', 1);
+
+            if (size_aux() == MAX_AUXFILE_SIZE)
                 rebuild();
         }
     }
 
 
-    bool remove(Key key) {
+    bool removeRecord(Key key) {
         fstream file(this->datfile, ios::in | ios::out | ios::binary);
-        // Al momento de eliminar, reemplazaremos el puntero con -1a ya que el último elemento siempre apunta a -1d
+        fstream aux(this->auxfile, ios::in | ios::out | ios::binary);
         T prev_record;
         file.read((char*) &prev_record, sizeof(T));
 
         // read first record
-        T record = readRecord(prev_record.nextDel, prev_record.nextFileChar);
-        T cur_record;
-        // si record coincide
-        if (record == key) {
-            int cur_next = record.nextDel;
-            char cur_nextChar = record.nextFileChar;
-            // si el sgte del primero esta en el datafile
-            if (prev_record.nextFileChar == 'd') {
+        char prev_char = 'd', cur_char, cur_nextchar;
+        int prev_pos = 0, cur_pos, cur_next;
+        T record;
+
+        do {
+            cur_pos = prev_record.nextDel;
+            cur_char = prev_record.nextFileChar;
+            record = readRecord(cur_pos, cur_char);
+
+            cur_next = record.nextDel;
+            cur_nextchar = record.nextFileChar;
+            if (record == key) {
+
+                //// only used to be ignored select and range queries
                 record.nextDel = -2;
                 record.nextFileChar = 'd';
-                // cursor to next index in prev_record -> overwrite record
-                file.seekp(sizeof(T)*prev_record.nextDel, ios::beg);
-                file.write((char*) &record, sizeof(T));
-            }   
-            // c.c. en el auxfile
-            else {
-                fstream auxFile(this->auxfile, ios::in | ios::out | ios::binary);
-                record.nextDel = -2;
-                record.nextFileChar = 'd';
-                // cursor to next index in prev_record -> overwrite record
-                auxFile.seekp(sizeof(T)*prev_record.nextDel, ios::beg);
-                auxFile.write((char*) &record, sizeof(T));
-                auxFile.close();
+
+                // cursor to next index in record -> overwrite next_record
+                if (cur_char == 'd') {
+                    file.seekp(sizeof(T)*cur_pos, ios::beg);
+                    file.write((char*) &record, sizeof(T));
+                }
+                else {
+                    aux.seekp(sizeof(T)*cur_pos, ios::beg);
+                    aux.write((char*) &record, sizeof(T));
+                }
+                /////
+
+                // range pointers -> saltar el record a eliminar
+                prev_record.nextDel = cur_next;
+                prev_record.nextFileChar = cur_nextchar;
+
+                // cursor to prev_pos -> overwrite updated record
+                if (prev_char == 'd') {
+                    file.seekp(sizeof(T)*prev_pos, ios::beg);
+                    file.write((char*) &prev_record, sizeof(T));
+                }
+                else {
+                    aux.seekp(sizeof(T)*prev_pos, ios::beg);
+                    aux.write((char*) &prev_record, sizeof(T));
+                }
+                file.close();
+                aux.close();
+                updateSize(cur_char, -1);
+                return true;
             }
 
-            prev_record.nextDel = cur_next;
-            prev_record.nextFileChar = cur_nextChar;
+            // loop (to next current)
+            prev_char = cur_char;
+            prev_pos = cur_pos;
+            prev_record = record;
 
-            file.seekp(0, ios::beg);
-            file.write((char*) &prev_record, sizeof(T));
-            file.close();
-
-            return true;
-            
-        } // En caso no sea el primero, sino entre los records
-        else {
-            fstream auxFile(this->auxfile, ios::in | ios::out | ios::binary);
-            char fileChar = 'd', cur_nextChar; 
-            int cur_pos = 1, cur_next;
-            
-            do {
-                cur_record = readRecord(record.nextDel, record.nextFileChar);
-                if (cur_record == key) {
-                    // Para reemplazar el puntero
-                    cur_next = cur_record.nextDel;
-                    cur_nextChar = cur_record.nextFileChar;
-
-                    cur_record.nextDel = -2;
-                    cur_record.nextFileChar = 'd';
-
-                    // cursor to next index in record -> overwrite cur_record
-                    if (record.nextFileChar == 'd') {
-                        file.seekp(sizeof(T)*record.nextDel, ios::beg);
-                        file.write((char*) &cur_record, sizeof(T));
-                    }
-                    else {
-                        auxFile.seekp(sizeof(T)*record.nextDel, ios::beg);
-                        auxFile.write((char*) &cur_record, sizeof(T));
-                    }
-
-                    // range pointers -> saltar el record a eliminar
-                    record.nextDel = cur_pos;
-                    record.nextFileChar = cur_nextChar;
-
-                    // cursor to cur_pos -> overwrite updated record
-                    if (fileChar == 'd') {
-                        file.seekp(sizeof(T)*cur_pos, ios::beg);
-                        file.write((char*) &record, sizeof(T));
-                    }
-                    else {
-                        auxFile.seekp(sizeof(T)*cur_pos, ios::beg);
-                        auxFile.write((char*) &record, sizeof(T));
-                    }
-                    file.close();
-                    auxFile.close();
-                    
-                    return true;
-                }
-
-                // loop (to next current)
-                fileChar = record.nextFileChar;
-                cur_pos = record.nextDel;
-                record = cur_record;
-
-                // hasta que no haya puntero al sgte
-            } while (cur_record.nextDel != -1);
-        }
-
+            // hasta que no haya puntero al sgte
+        } while (cur_next != -1);
+        
         return false;
     }
 
@@ -298,20 +296,21 @@ public:
             } else if (record < key) {
                 p = mid + 1;
             } else {
-                records.push_back(record);
+                if (record.nextDel != -2)
+                    records.push_back(record);
 
                 // records, with same key, stay in adjacent lines
                 // -> read in two for loops (to up and to down)
                 for (int i = mid - 1; i >= p; i--) {
                     record = readRecord(i, 'd');
-                    if (record == key) 
+                    if (record == key && record.nextDel != -2) 
                         records.push_back(record);
                      else break;
                 }
 
                 for (int i = mid + 1; i <= down; i++) {
                     record = readRecord(i, 'd');
-                    if (record == key) 
+                    if (record == key && record.nextDel != -2) 
                         records.push_back(record);
                      else break;
                 }
@@ -323,13 +322,13 @@ public:
 
         if (records.empty()) {
             // si no existe en el file, do linear search in aux file
-            fstream auxFile(this->auxfile, ios::in | ios::binary);
-            while (auxFile.read((char*)&record, sizeof(T))) {
-                if (record == key) {
+            fstream aux(this->auxfile, ios::in | ios::binary);
+            while (aux.read((char*)&record, sizeof(T))) {
+                if (record == key && record.nextDel != -2) {
                     records.push_back(record);
                 }
             }
-            auxFile.close();
+            aux.close();
         }
 
         return records;
@@ -362,7 +361,7 @@ public:
         // loop for matching keys in current reads
         while (current < k_end || current == k_end) {  //a <= k_end
        
-            if (current > k_begin || current == k_begin) //a >= k_begin
+            if (current > k_begin || current == k_begin && current.nextDel != -2) //a >= k_begin
                 result.push_back(current); 
             
             if (current.nextDel == -1) break;
