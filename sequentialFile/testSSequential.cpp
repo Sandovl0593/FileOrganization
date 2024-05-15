@@ -4,32 +4,32 @@
 int main() {
     SequentialFile<string, Record> seq("datos.dat", "aux.dat");
 
-    seq.insert(Record("20203", "alonso"));
-    seq.insert(Record("20222", "albina"));
-    seq.insert(Record("20199", "renzo"));
-    seq.insert(Record("20201", "camila"));
-    seq.insert(Record("20200", "gilberto"));
-    seq.insert(Record("20149", "renzo"));
-    seq.insert(Record("20145", "renzo"));
-    seq.insert(Record("20149", "camila"));
-    seq.insert(Record("20129", "raul"));
-    seq.insert(Record("20349", "tauro"));
-    
-    seq.printFile('d');
+    seq.insertRecord(Record("20203", "alonso"));
+    seq.insertRecord(Record("20222", "albina"));
+    seq.insertRecord(Record("20199", "renzo"));
+    seq.insertRecord(Record("20201", "camila"));
+    seq.insertRecord(Record("20200", "gilberto"));
+    seq.insertRecord(Record("20149", "renzo"));
+    seq.insertRecord(Record("20145", "renzo"));
+    seq.insertRecord(Record("20149", "camila"));
+    seq.insertRecord(Record("20129", "raul"));
+    seq.printFile();
     cout << "---" << endl;
-    seq.printFile('a');
-    // cout << "--- rebuild" << endl;
-    // vector<Record> s = seq.search("renzo");
-    // vector<Record> s2 = seq.range_search("camila", "raul");
-    // for (auto &r: s2) cout << r << endl;
-    // seq.rebuild();
-    // cout << "---" << endl;
-    // seq.printFile('d');
+    vector<Record> s2 = seq.range_search("camila", "raul");
+    for (auto &r: s2) cout << r << endl;
     cout << "--- remove " << endl;
-    seq.remove("gilberto");
-    seq.remove("albina");
+    seq.removeRecord("renzo");
+    seq.removeRecord("gilberto");
     cout << "---" << endl;
-    seq.printFile('d');
+    seq.printFile();
     cout << "---" << endl;
-    seq.printFile('a');
+    vector<Record> s3 = seq.range_search("camila", "raul");
+    for (auto &r: s3) cout << r << endl;
+    cout << "---" << endl;
+    seq.insertRecord(Record("20349", "tauro"));
+    seq.insertRecord(Record("20309", "daniel"));
+    seq.insertRecord(Record("20107", "fausto"));
+    seq.insertRecord(Record("20111", "hugo"));
+    seq.printFile();
+    cout << "---" << endl;
 }
