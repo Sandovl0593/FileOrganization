@@ -1,5 +1,5 @@
-#ifndef FILEORGANIZATION_RECORDS_H
-#define FILEORGANIZATION_RECORDS_H
+#ifndef FILEORGANIZATION_RECORD_H
+#define FILEORGANIZATION_RECORD_H
 
 #include <iostream>
 #include <cstring>
@@ -85,5 +85,4 @@ struct Game {
              << ", Season Type: " << season_type << endl;
     }
 };
-
-#endif //FILEORGANIZATION_RECORDS_H
+#endif //FILEORGANIZATION_RECORD_H
