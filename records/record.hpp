@@ -6,7 +6,8 @@
 #include <string>
 using namespace std;
 
-struct Player{
+class Player{
+public:
     double weight, season_exp, from_year, to_year;
     long long id, team_id;
     char name[25], birthdate[11], school[32], country[25], height[5], jersey[8],
@@ -66,7 +67,8 @@ struct Player{
 };
 
 
-struct Game {
+class Game {
+public:
     double  pts_home, plus_minus_home, pts_away, plus_minus_away;
     long long season_id, team_id_home, id,team_id_away;
     char team_abbreviation_home[4], team_name_home[23], game_date[11], matchup_home[12], team_abbreviation_away[4], team_name_away[26], matchup_away[10], season_type[15];

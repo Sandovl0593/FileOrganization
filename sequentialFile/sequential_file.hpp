@@ -1,21 +1,37 @@
+#ifndef FILEORGANIZATION_EXTENDIBLE_HASH_H
+#define FILEORGANIZATION_EXTENDIBLE_HASH_H
+
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <functional>
 
 #define MAX_AUXFILE_SIZE 10
 
 using namespace std;
-
-
 
 template <typename Key, typename T>
 class SequentialFile {
     string datfile;
     string auxfile;
 
+    // comparators
+    function<bool(const T &, const T &)> less;
+    function<bool(const T &, const T &)> greater;
+    function<bool(const T &, const T &)> equal;
+    function<bool(const T &, const Key &)> equal_key;
+    function<bool(const T &, const Key &)> less_key;
+    function<bool(const T &, const Key &)> greater_key;
+
 public:
 
-    SequentialFile(string datFilename, string auxFilename) {
+    SequentialFile(string datFilename, string auxFilename,
+                   function<bool(const T &, const T &)> less,
+                   function<bool(const T &, const T &)> greater,
+                   function<bool(const T &, const T & )> equal,
+                   function<bool(const T &, const Key &)> equal_key,
+                   function<bool(const T &, const Key &)> less_key,
+                   function<bool(const T &, const Key &)> greater_key) {
         this->datfile = datFilename;
         this->auxfile = auxFilename;
         ofstream file;
@@ -29,6 +45,13 @@ public:
         file.write((char*)&basesize, sizeof(int));  // datfile
         file.write((char*)&basesize, sizeof(int));  // auxfile
         file.close();
+
+        this->less = less;
+        this->greater = greater;
+        this->equal = equal;
+        this->equal_key = equal_key;
+        this->less_key = less_key;
+        this->greater_key = greater_key;
     };
 
     void printFile() {
@@ -36,7 +59,7 @@ public:
         T record;
         file.read((char*) &record, sizeof(T));
         do {
-            cout << record << endl;
+            record.showData();
             record = readRecord(record.nextDel, record.nextFileChar);
         }
         while (record.nextDel != -1);
@@ -172,7 +195,7 @@ public:
             file.seekg(0, ios::beg);
             file.read((char *)&next_record, sizeof(T));
 
-             while (record > next_record) {   
+             while (greater(record, next_record)) {   
                 cur_record = next_record;
                 cur_pos = cur_next;
                 cur_char = cur_nextChar;
@@ -233,7 +256,7 @@ public:
 
             cur_next = record.nextDel;
             cur_nextchar = record.nextFileChar;
-            if (record == key) {
+            if (equal_key(record, key)) {
 
                 //// only used to be ignored select and range queries
                 record.nextDel = -2;
@@ -291,9 +314,9 @@ public:
             mid = (p + down) / 2;
             record = readRecord(mid, 'd');
             // binary search
-            if (record > key) {
+            if (greater_key(record, key)) {
                 down = mid - 1;
-            } else if (record < key) {
+            } else if (less_key(record, key)) {
                 p = mid + 1;
             } else {
                 if (record.nextDel != -2)
@@ -303,14 +326,14 @@ public:
                 // -> read in two for loops (to up and to down)
                 for (int i = mid - 1; i >= p; i--) {
                     record = readRecord(i, 'd');
-                    if (record == key && record.nextDel != -2) 
+                    if (equal_key(record, key) && record.nextDel != -2) 
                         records.push_back(record);
                      else break;
                 }
 
                 for (int i = mid + 1; i <= down; i++) {
                     record = readRecord(i, 'd');
-                    if (record == key && record.nextDel != -2) 
+                    if (equal_key(record, key) && record.nextDel != -2) 
                         records.push_back(record);
                      else break;
                 }
@@ -324,7 +347,7 @@ public:
             // si no existe en el file, do linear search in aux file
             fstream aux(this->auxfile, ios::in | ios::binary);
             while (aux.read((char*)&record, sizeof(T))) {
-                if (record == key && record.nextDel != -2) {
+                if (equal_key(record, key) && record.nextDel != -2) {
                     records.push_back(record);
                 }
             }
@@ -386,3 +409,5 @@ public:
     }
 
 };
+
+#endif

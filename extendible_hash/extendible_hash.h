@@ -1,8 +1,9 @@
 #ifndef FILEORGANIZATION_EXTENDIBLE_HASH_H
 #define FILEORGANIZATION_EXTENDIBLE_HASH_H
-#include "record.h"
 #include <fstream>
+#include <iostream>
 
+using namespace std;
 
 class extendible_hash {
 private:

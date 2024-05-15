@@ -1,7 +1,8 @@
 #include "extendible_hash.h"
-#include <fstream>
 #include <sstream>
 #include <vector>
+#include "../records/record.hpp"
+
 
 int main() {
     ifstream csvFile("/Users/smdp/Documents/PERSONAL/DB2/FileOrganization/dataset/PlayerInfo.csv");
