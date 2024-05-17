@@ -221,8 +221,9 @@ bool Parser::parseCreateSent() {
         throwParser("Parser error - se espera un directorio");
         return false;
     }
+    string table_name = memoria["table"][0];
     string file = previous->lexema;
-    // ejecuta el create table
+    // ejecuta el create table  
     // ...
     // libera la tabla para la sgte query
     memoria["table"].clear();

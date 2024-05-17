@@ -2,7 +2,7 @@
 // otras estructuras
 #include "../records/record_seq.hpp"
 #include "../parser/scanner.hpp"
-// otros records
+// otros sel_records
 
 const vector<string> at_player = {"id", "name", "birthdate", "school", "country", "height", "weight", "season_exp",
                             "jersey", "position", "team_id", "team_name", "team_abbreviation", "team_city", "from_year", "to_year"};
@@ -54,10 +54,10 @@ bool select_query(string table, bool all_at, vector<string> atributes, string k_
             }
         }
 
-        vector<string> record;
+        vector<string> sel_record;
         for (auto &el: res) {
-            record = el.selectData(all_at, pos_atributes);
-            for (auto &data: record) cout << " | " << data;
+            sel_record = el.selectData(all_at, pos_atributes);
+            for (auto &data: sel_record) cout << " | " << data;
             cout << " |" << endl;
         }
 
@@ -95,9 +95,9 @@ bool select_query(string table, bool all_at, vector<string> atributes, string k_
         vector<int> pos_atributes = {};
         if (!all_at) {
             for (auto& at: atributes) {
-                auto it = find(at_player.begin(), at_player.end(), at); 
-                if (it != at_player.end()) {
-                    pos_atributes.push_back(it - at_player.begin());
+                auto it = find(at_game.begin(), at_game.end(), at); 
+                if (it != at_game.end()) {
+                    pos_atributes.push_back(it - at_game.begin());
                 } else {
                     cout << "atributo no identificado" << endl;
                     return false;
@@ -105,10 +105,10 @@ bool select_query(string table, bool all_at, vector<string> atributes, string k_
             }
         }
 
-        vector<string> record;
+        vector<string> sel_record;
         for (auto &el: res) {
-            record = el.selectData(all_at, pos_atributes);
-            for (auto &data: record) cout << " | " << data;
+            sel_record = el.selectData(all_at, pos_atributes);
+            for (auto &data: sel_record) cout << " | " << data;
             cout << " |" << endl;
         }
 
@@ -120,14 +120,8 @@ bool select_query(string table, bool all_at, vector<string> atributes, string k_
 
 bool select_allrows(string table, bool all_at, vector<string> atributes) {
     if (table == "player") {
-        vector<PlayerSeq> res;
-        SequentialFile<long long, PlayerSeq> seq("table_seq_player.dat", "table_aux_seq_player.dat",
-                                                []( PlayerSeq& a, PlayerSeq& b) { return a.id < b.id;},
-                                                []( PlayerSeq& a, PlayerSeq& b) { return a.id > b.id;},
-                                                []( PlayerSeq& a, PlayerSeq& b) { return a.id == b.id;},
-                                                []( PlayerSeq& a, long long & b) { return a.id == b;},
-                                                []( PlayerSeq& a, long long & b) { return a.id < b;},
-                                                []( PlayerSeq& a, long long & b) { return a.id > b;} );
+        SequentialFile<long long, PlayerSeq> seq("table_seq_player.dat", "table_aux_seq_player.dat");
+        vector<PlayerSeq> res = seq.getAll();
 
         vector<int> pos_atributes = {};
         if (!all_at) {
@@ -142,22 +136,16 @@ bool select_allrows(string table, bool all_at, vector<string> atributes) {
             }
         }
 
-        vector<string> record;
+        vector<string> sel_record;
         for (auto &el: res) {
-            record = el.selectData(all_at, pos_atributes);
-            for (auto &data: record) cout << " | " << data;
+            sel_record = el.selectData(all_at, pos_atributes);
+            for (auto &data: sel_record) cout << " | " << data;
             cout << " |" << endl;
         }
 
     } else if (table == "game") {
-        vector<GameSeq> res;
-        SequentialFile<long long, GameSeq> seq("table_seq_game.dat", "table_aux_seq_game.dat",
-                                                []( GameSeq& a, GameSeq& b) { return a.id < b.id;},
-                                                []( GameSeq& a, GameSeq& b) { return a.id > b.id;},
-                                                []( GameSeq& a, GameSeq& b) { return a.id == b.id;},
-                                                []( GameSeq& a, long long & b) { return a.id == b;},
-                                                []( GameSeq& a, long long & b) { return a.id < b;},
-                                                []( GameSeq& a, long long & b) { return a.id > b;} );
+        SequentialFile<long long, GameSeq> seq("table_seq_game.dat", "table_aux_seq_game.dat");
+        vector<GameSeq> res = seq.getAll();
 
         vector<int> pos_atributes = {};
         if (!all_at) {
@@ -172,10 +160,10 @@ bool select_allrows(string table, bool all_at, vector<string> atributes) {
             }
         }
 
-        vector<string> record;
+        vector<string> sel_record;
         for (auto &el: res) {
-            record = el.selectData(all_at, pos_atributes);
-            for (auto &data: record) cout << " | " << data;
+            sel_record = el.selectData(all_at, pos_atributes);
+            for (auto &data: sel_record) cout << " | " << data;
             cout << " |" << endl;
         }
     }
@@ -185,10 +173,7 @@ bool select_allrows(string table, bool all_at, vector<string> atributes) {
 
 bool insert_values(string table, vector<string> values) {
     if (table == "player") {
-        PlayerSeq record(stoll(values[0]), values[1], values[2], values[3],
-           values[4], values[5], stod(values[6]), stod(values[7]),
-           values[8], values[9], stoll(values[10]), values[11], values[12], values[13], 
-           stod(values[14]), stod(values[15]));
+        PlayerSeq sel_record(values);
 
         SequentialFile<long long, PlayerSeq> seq("table_seq_player.dat", "table_aux_seq_player.dat",
                                                 []( PlayerSeq& a, PlayerSeq& b) { return a.id < b.id;},
@@ -197,7 +182,7 @@ bool insert_values(string table, vector<string> values) {
                                                 []( PlayerSeq& a, long long & b) { return a.id == b;},
                                                 []( PlayerSeq& a, long long & b) { return a.id < b;},
                                                 []( PlayerSeq& a, long long & b) { return a.id > b;} );
-        seq.insertRecord(record);
+        seq.insertRecord(sel_record);
 
         // otra estructura y su insert ...
         // ...
@@ -205,10 +190,7 @@ bool insert_values(string table, vector<string> values) {
         return true;
 
     } else if (table == "game") {
-        GameSeq record(stoll(values[0]), stoll(values[1]), values[2], values[3],
-           stoll(values[4]), values[5], values[6], stod(values[7]),
-           stod(values[8]), stoll(values[9]), values[10], values[11], values[12], 
-           stod(values[13]), stod(values[14]), values[15]);
+        GameSeq sel_record(values);
 
         SequentialFile<long long, GameSeq> seq("table_seq_game.dat", "table_aux_seq_game.dat",
                                                 []( GameSeq& a, GameSeq& b) { return a.id < b.id;},
@@ -218,7 +200,7 @@ bool insert_values(string table, vector<string> values) {
                                                 []( GameSeq& a, long long & b) { return a.id < b;},
                                                 []( GameSeq& a, long long & b) { return a.id > b;} );
         
-        seq.insertRecord(record);
+        seq.insertRecord(sel_record);
 
         // otra estructura y su insert ...
         // ...
@@ -227,3 +209,98 @@ bool insert_values(string table, vector<string> values) {
     } 
     cout << "No existe tabla con ese nombre"; return false;
 }
+
+
+bool create_table(string table, string data_file) {
+    if (table == "player") {
+        SequentialFile<long long, GameSeq> seq("table_seq_player.dat", "table_aux_seq_player.dat");
+        // ------ other structures
+        // ....
+
+        ifstream csvFile("../dataset/PlayerInfo.csv");
+        string line, cell;
+        vector<string> row;
+
+        getline(csvFile, line); // skip header col
+
+        while(getline(csvFile, line)) {
+            stringstream lineStream(line);
+            while (getline(lineStream, cell, ',')) {
+                row.push_back(cell);
+            }
+            PlayerSeq record(row);
+            seq.insertRecord(row);
+            // other inserts
+            // ...
+
+            row.clear();
+        }
+    }
+    else if (table == "game") {
+        SequentialFile<long long, GameSeq> seq("table_seq_game.dat", "table_aux_seq_game.dat");
+        // ------ other structures
+        // ....
+
+        ifstream csvFile("../dataset/game.csv");
+        string line, cell;
+        vector<string> row;
+
+        getline(csvFile, line); // skip header col
+
+        while(getline(csvFile, line)) {
+            stringstream lineStream(line);
+            while (getline(lineStream, cell, ',')) {
+                row.push_back(cell);
+            }
+            GameSeq record(row);
+            seq.insertRecord(row);
+            // other inserts
+            // ...
+
+            row.clear();
+        }
+    }
+    cout << "No existe tabla con ese nombre"; return false;
+}
+
+
+/// ONLY ASIGNATION
+bool delete_query(string table, string atribute, string value) {
+    if (table == "player") {
+        SequentialFile<long long, PlayerSeq> seq("table_seq_player.dat", "table_aux_seq_player.dat",
+                                                []( PlayerSeq& a, PlayerSeq& b) { return a.id < b.id;},
+                                                []( PlayerSeq& a, PlayerSeq& b) { return a.id > b.id;},
+                                                []( PlayerSeq& a, PlayerSeq& b) { return a.id == b.id;},
+                                                []( PlayerSeq& a, long long & b) { return a.id == b;},
+                                                []( PlayerSeq& a, long long & b) { return a.id < b;},
+                                                []( PlayerSeq& a, long long & b) { return a.id > b;} );
+
+        // other structures
+        // ...
+
+        if (atribute == "id") {
+            seq.removeRecord(stoll(value));
+        }
+
+        return true;
+
+    } else if (table == "game") {
+        SequentialFile<long long, GameSeq> seq("table_seq_game.dat", "table_aux_seq_game.dat",
+                                                []( GameSeq& a, GameSeq& b) { return a.id < b.id;},
+                                                []( GameSeq& a, GameSeq& b) { return a.id > b.id;},
+                                                []( GameSeq& a, GameSeq& b) { return a.id == b.id;},
+                                                []( GameSeq& a, long long & b) { return a.id == b;},
+                                                []( GameSeq& a, long long & b) { return a.id < b;},
+                                                []( GameSeq& a, long long & b) { return a.id > b;} );
+
+        // other structures
+        // ...
+
+        if (atribute == "id") {
+            seq.removeRecord(stoll(value));
+        }
+
+        return true;
+    }
+    cout << "No existe tabla con ese nombre"; return false;
+} 

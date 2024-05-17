@@ -23,15 +23,7 @@ class SequentialFile {
     function<bool(T &, Key &)> less_key;
     function<bool(T &, Key &)> greater_key;
 
-public:
-
-    SequentialFile(string datFilename, string auxFilename,
-                   function<bool(T &, T &)> less,
-                   function<bool(T &, T &)> greater,
-                   function<bool(T &, T &)> equal,
-                   function<bool(T &, Key &)> equal_key,
-                   function<bool(T &, Key &)> less_key,
-                   function<bool(T &, Key &)> greater_key) {
+    void startInstance(string datFilename, string auxFilename) {
         this->datfile = datFilename;
         this->auxfile = auxFilename;
         ofstream file;
@@ -40,11 +32,26 @@ public:
         file.open(auxFilename, ios::binary);
         file.close();
 
-        file.open("metadata.dat", ios::binary);
+        file.open("metadata_seq.dat", ios::binary);
         int basesize = 0;
         file.write((char*)&basesize, sizeof(int));  // datfile
         file.write((char*)&basesize, sizeof(int));  // auxfile
         file.close();
+    }
+
+public:
+    SequentialFile(string datFilename, string auxFilename) {
+        startInstance(datFilename, auxFilename);
+    };
+
+    SequentialFile(string datFilename, string auxFilename,
+                   function<bool(T &, T &)> less,
+                   function<bool(T &, T &)> greater,
+                   function<bool(T &, T &)> equal,
+                   function<bool(T &, Key &)> equal_key,
+                   function<bool(T &, Key &)> less_key,
+                   function<bool(T &, Key &)> greater_key) {
+        startInstance(datFilename, auxFilename);
 
         this->less = less;
         this->greater = greater;
@@ -53,6 +60,21 @@ public:
         this->less_key = less_key;
         this->greater_key = greater_key;
     };
+
+    vector<T> getAll() {
+        vector<T> all_records;
+        ifstream file(this->datfile, ios::binary);
+        T record;
+        file.read((char*) &record, sizeof(T));
+        do {
+            all_records.push_back(record);
+            record = readRecord(record.nextDel, record.nextFileChar);
+        }
+        while (record.nextDel != -1);
+        all_records.push_back(record);
+        file.close();
+        return all_records;
+    }
 
     void printFile() {
         ifstream file(this->datfile, ios::binary);
