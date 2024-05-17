@@ -169,15 +169,14 @@ bool Parser::parseInsertSent() {
         // ejecuta el insert
         vector<string> values = memoria["values"];
         bool execute = insert_values(memoria["table"][0], values);
-        
-        clearMemory();
+
+        // libera la tabla para la sgte query
+        memoria["values"].clear();
+        memoria["table"].clear();
         if (!execute) {
             report = "Ejecución no completa";
             return false;
         }
-        // libera la tabla para la sgte query
-        memoria["table"].clear();
-        memoria["values"].clear();
         return true;
     }
     throwParser("Parser error - se espera valores");
@@ -305,12 +304,29 @@ bool Parser::parseSelectSent() {
         } 
         else if (match(Token::BETWEEN)) {
             if (parseValue()) {
-
                 if (match(Token::AND)) {
                     if (!parseValue()) return false;
+
                     // ejecuta el select
-                    memoria["table"].clear();
-                    memoria["atributes"].clear();
+                    string k_atrib = memoria["atributes"].back();
+                    memoria["atributes"].pop_back();
+                    string begin = memoria["values"][0];
+                    vector<string> atributes = memoria["atributes"];
+                    memoria["atributes"].pop_back();
+                    string end = memoria["values"][1];
+                    Token::Type atr_index = indexes[k_atrib];
+
+                    bool execute;
+                    if (check_atr == 2) 
+                        execute = select_query(memoria["table"][0], true, atributes, k_atrib, begin, end, atr_index, Token::BETWEEN);
+                    else
+                        execute = select_query(memoria["table"][0], false, atributes, k_atrib, begin, end, atr_index, Token::BETWEEN);
+
+                    clearMemory();
+                    if (!execute) {
+                        report = "Ejecución no completa";
+                        return false;
+                    }
                     return true;
                 } else {
                     throwParser("Parser error - Se espera un comparador");
