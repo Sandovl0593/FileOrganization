@@ -311,9 +311,8 @@ bool Parser::parseSelectSent() {
                     string k_atrib = memoria["atributes"].back();
                     memoria["atributes"].pop_back();
                     string begin = memoria["values"][0];
-                    vector<string> atributes = memoria["atributes"];
-                    memoria["atributes"].pop_back();
                     string end = memoria["values"][1];
+                    vector<string> atributes = memoria["atributes"];
                     Token::Type atr_index = indexes[k_atrib];
 
                     bool execute;
