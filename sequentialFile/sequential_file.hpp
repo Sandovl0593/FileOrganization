@@ -63,7 +63,7 @@ public:
             record = readRecord(record.nextDel, record.nextFileChar);
         }
         while (record.nextDel != -1);
-        cout << record << endl;
+        record.showData();
         
         file.close();
     }
@@ -314,9 +314,8 @@ public:
         return false;
     }
 
-    vector<T> search(Key key) {
+    T search(Key key) {
         fstream file(this->datfile, ios::in | ios::binary);
-        vector<T> records;
 
         T record;
         int p = 1, down = size_dat() - 1, mid;
@@ -331,23 +330,7 @@ public:
                 p = mid + 1;
             } else {
                 if (record.nextDel != -2)
-                    records.push_back(record);
-
-                // records, with same key, stay in adjacent lines
-                // -> read in two for loops (to up and to down)
-                for (int i = mid - 1; i >= p; i--) {
-                    record = readRecord(i, 'd');
-                    if (equal_key(record, key) && record.nextDel != -2) 
-                        records.push_back(record);
-                     else break;
-                }
-
-                for (int i = mid + 1; i <= down; i++) {
-                    record = readRecord(i, 'd');
-                    if (equal_key(record, key) && record.nextDel != -2) 
-                        records.push_back(record);
-                     else break;
-                }
+                    return record;
                 break;
             }
         }
@@ -359,13 +342,13 @@ public:
             fstream aux(this->auxfile, ios::in | ios::binary);
             while (aux.read((char*)&record, sizeof(T))) {
                 if (equal_key(record, key) && record.nextDel != -2) {
-                    records.push_back(record);
+                    return record;
                 }
             }
             aux.close();
         }
 
-        return records;
+        return T();
     }
 
     vector<T> range_search(Key k_begin, Key k_end, bool equal) {

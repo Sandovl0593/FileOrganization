@@ -90,11 +90,11 @@ public:
         vector<string> values = {_id, _name, _birthdate, _school, _country, _height, _weight, _season_exp,
            _jersey, _position, _team_id, _team_name, _team_abbreviation, _team_city, _from_year, _to_year};
 
-        if (all) for (int i: pos_atributes)
+        if (!all) for (int i: pos_atributes) {
             result.push_back(values[i]);
-        else 
-            return values;
-        return result;
+            return result;
+        }
+        return values;
     }
 };
 
@@ -178,11 +178,11 @@ public:
         vector<string> values = {_season_id, _team_id_home, _team_abbreviation_home, _team_name_home, _id,  _game_date, _matchup_home, _pts_home, _plus_minus_home,
          _team_id_away, _team_abbreviation_away, _team_name_away, _matchup_away, _pts_away, _plus_minus_away, _season_type};
 
-        if (all) for (int i: pos_atributes)
+        if (!all) for (int i: pos_atributes) {
             result.push_back(values[i]);
-        else 
-            return values;
-        return result;
+            return result;
+        }
+        return values;
     }
 };
 #endif //FILEORGANIZATION_RECORD_H

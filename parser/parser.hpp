@@ -28,7 +28,7 @@ private:
     bool parseIndexSent();
     bool parseDeleteSent();
 
-    bool parseAtributes();
+    int parseAtributes();
     bool parseAtribute();
 
     bool parseTable();
@@ -137,19 +137,16 @@ bool Parser::parseAtribute() {
     return false;
 }
 
-bool Parser::parseAtributes() {
-    if (match(Token::ALL)) {
-        // guardar todas los campos (no asignar valores -> por defecto aplicaria todo)
-        memoria["values"];
-        return true;
-    }
+int Parser::parseAtributes() {
+    if (match(Token::ALL))
+        return 2;
     else if (parseAtribute()) {
         while (match(Token::COMMA)) {
-            if (!parseAtribute()) return false;
+            if (!parseAtribute()) return 0;
         }   
-        return true;
+        return 1;
     } 
-    return false;
+    return 0;
 }
 
 bool Parser::parseInsertSent() {
@@ -170,8 +167,15 @@ bool Parser::parseInsertSent() {
             return false;
         }
         // ejecuta el insert
-        // ...
-        // libera la tabla para la sgte consulta
+        vector<string> values = memoria["values"];
+        bool execute = insert_values(memoria["table"][0], values);
+        
+        clearMemory();
+        if (!execute) {
+            report = "Ejecución no completa";
+            return false;
+        }
+        // libera la tabla para la sgte query
         memoria["table"].clear();
         memoria["values"].clear();
         return true;
@@ -192,7 +196,7 @@ bool Parser::parseDeleteSent() {
             if (!parseValue()) return false;
             // ejecuta el remove
             // ...
-            // libera la tabla para la sgte consulta
+            // libera la tabla para la sgte query
             memoria["table"].clear();
             memoria["atributes"].clear();
             return true;
@@ -221,7 +225,7 @@ bool Parser::parseCreateSent() {
     string file = previous->lexema;
     // ejecuta el create table
     // ...
-    // libera la tabla para la sgte consulta
+    // libera la tabla para la sgte query
     memoria["table"].clear();
     return true;
 }
@@ -254,7 +258,7 @@ bool Parser::parseIndexSent() {
             }
             // actualiza el index al atributo
             indexes[memoria["table"][0]] = token;
-            // libera la tabla para la sgte consulta
+            // libera la tabla para la sgte query
             memoria["table"].clear();
             return true;
         }
@@ -265,7 +269,8 @@ bool Parser::parseIndexSent() {
 
 
 bool Parser::parseSelectSent() {
-    if (!parseAtributes()) return false;
+    int check_atr = parseAtributes();
+    if (!check_atr) return false;
     if (!match(Token::FROM)) {
         throwParser("Parser error de sintaxis");
         return false;
@@ -277,22 +282,33 @@ bool Parser::parseSelectSent() {
         if (match(Token::LESS) || match(Token::LESSEQUAL) || match(Token::GREATER) || match(Token::GREATEREQUAL) || match(Token::EQUAL)) {
             Token::Type comparator = previous->type;
             if (!parseValue()) return false;
-            // ejecuta la busqueda por rango
-            // ...
-            string atribute = memoria["atributes"][0];
-            string value = memoria["values"][0];
-            Token::Type atr_index = indexes[atribute];
 
-            memoria["table"].clear();
-            memoria["atributes"].clear();
+            // ejecuta el select
+            string k_atrib = memoria["atributes"].back();
+            memoria["atributes"].pop_back();
+            vector<string> atributes = memoria["atributes"];
+            string value = memoria["values"][0];
+            Token::Type atr_index = indexes[k_atrib];
+
+            bool execute;
+            if (check_atr == 2) 
+                execute = select_query(memoria["table"][0], true, atributes, k_atrib, value, "", atr_index, comparator);
+            else
+                execute = select_query(memoria["table"][0], false, atributes, k_atrib, value, "", atr_index, comparator);
+
+            clearMemory();
+            if (!execute) {
+                report = "Ejecución no completa";
+                return false;
+            }
             return true;
         } 
         else if (match(Token::BETWEEN)) {
             if (parseValue()) {
 
-                if (match(Token::AND) || match(Token::OR)) {
+                if (match(Token::AND)) {
                     if (!parseValue()) return false;
-                    // ejecuta la busqueda por rango
+                    // ejecuta el select
                     memoria["table"].clear();
                     memoria["atributes"].clear();
                     return true;
@@ -307,6 +323,8 @@ bool Parser::parseSelectSent() {
         return false;
     }
     // ejecuta el select
+
+
     memoria["table"].clear();
     memoria["atributes"].clear();
     return true;
