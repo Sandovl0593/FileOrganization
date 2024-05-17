@@ -6,17 +6,17 @@ using namespace std;
 class Token {
 public:
     enum Type { LPAREN=0, RPAREN, 
-                CREATE, TABLE, INSERT, INTO, USING, INDEX, DELETE,
+                CREATE, TABLE, INSERT, INTO, USING, INDEX, DELETE, ON,
                 SELECT, FROM, WHERE,
                 FILE, VALUES,
-                HASH, BTREE, SEQ,
+                HASH, ISAM, SEQ,
                 AND, OR, BETWEEN,
                 LESS, GREATER, LESSEQUAL, GREATEREQUAL, EQUAL,
                 COMMA, PTCOMMA,
                 ALL, 
                 ID, NUM, FLOAT, STRING,
                 ERR, END };
-    static const char* token_names[34];
+    static const char* token_names[35];
     Type type;
     string lexema;
     Token(Type);
@@ -24,12 +24,12 @@ public:
     Token(Type, const string source);
 };
 
-const char* Token::token_names[34] = 
+const char* Token::token_names[35] = 
               { "LPAREN", "RPAREN", 
-                "CREATE", "TABLE", "INSERT", "INTO", "USING", "INDEX", "DELETE",
+                "CREATE", "TABLE", "INSERT", "INTO", "USING", "INDEX", "DELETE", "ON",
                 "SELECT", "FROM", "WHERE", 
                 "FILE", "VALUES",
-                "HASH", "BTREE", "SEQ",
+                "HASH", "ISAM", "SEQ",
                 "AND", "OR", "BETWEEN",
                 "LESS", "GREATER", "LESSEQUAL", "GREATEREQUAL", "EQUAL",
                 "COMMA", "PTCOMMA",

@@ -1,5 +1,6 @@
-#include "scanner.hpp"
+#include "../utils/query.hpp"
 #include <vector>
+
 
 class Parser {
 private:
@@ -7,6 +8,7 @@ private:
     Token *current, *previous;
     string report;
     unordered_map<string, vector<string>> memoria;
+    unordered_map<string, Token::Type> indexes;
 
     bool match(Token::Type ttype);
     bool check(Token::Type ttype);
@@ -23,16 +25,14 @@ private:
     bool parseCreateSent();
     bool parseInsertSent();
     bool parseSelectSent();
+    bool parseIndexSent();
+    bool parseDeleteSent();
 
     bool parseAtributes();
     bool parseAtribute();
 
     bool parseTable();
-
-    bool parseCondition();
     bool parseBoolOp();
-
-    bool parseDeleteSent();
 
 public:
     Parser(Scanner* scanner);
@@ -122,34 +122,10 @@ bool Parser::parseTable() {
 bool Parser::parseValues() {
     if (!parseValue()) return false;
     while (match(Token::COMMA))
+    
         if (!parseValue()) return false;
 
     return true;
-}
-
-bool Parser::parseCondition() {
-    if (!parseAtribute()) return false;
-    if (match(Token::LESS) || match(Token::LESSEQUAL) || match(Token::GREATER) || match(Token::GREATEREQUAL) || match(Token::EQUAL)) {
-        if (!parseValue()) return false;
-        // ejecuta la busqueda por rango
-        return true;
-    } 
-    else if (match(Token::BETWEEN)) {
-        if (parseValue()) {
-
-            if (match(Token::AND) || match(Token::OR)) {
-                if (!parseValue()) return false;
-                // ejecuta la busqueda por rango
-                return true;
-            } else {
-                throwParser("Parser error - Se espera un comparador");
-                return false;
-            }
-        } 
-        return false;
-    }
-    throwParser("Parser error - Se espera un comparador");
-    return false;
 }
 
 bool Parser::parseAtribute() {
@@ -164,6 +140,7 @@ bool Parser::parseAtribute() {
 bool Parser::parseAtributes() {
     if (match(Token::ALL)) {
         // guardar todas los campos (no asignar valores -> por defecto aplicaria todo)
+        memoria["values"];
         return true;
     }
     else if (parseAtribute()) {
@@ -193,6 +170,10 @@ bool Parser::parseInsertSent() {
             return false;
         }
         // ejecuta el insert
+        // ...
+        // libera la tabla para la sgte consulta
+        memoria["table"].clear();
+        memoria["values"].clear();
         return true;
     }
     throwParser("Parser error - se espera valores");
@@ -206,8 +187,17 @@ bool Parser::parseDeleteSent() {
     }
     if (!parseTable()) return false;
     if (match(Token::WHERE)) {
-        if (!parseCondition()) return false;
-        // ejecuta el remove
+        if (!parseAtribute()) return false;
+        if (match(Token::EQUAL)) {
+            if (!parseValue()) return false;
+            // ejecuta el remove
+            // ...
+            // libera la tabla para la sgte consulta
+            memoria["table"].clear();
+            memoria["atributes"].clear();
+            return true;
+        } 
+        memoria["table"].clear();
         return true;
     }
     throwParser("Parser error - se espera WHERE");
@@ -215,10 +205,6 @@ bool Parser::parseDeleteSent() {
 }
 
 bool Parser::parseCreateSent() {
-    if (!match(Token::TABLE)) {
-        throwParser("Parser error de sintaxis");
-        return false;
-    }
     if (!parseTable()) return false;
     if (!match(Token::FROM)) {
         throwParser("Parser error de sintaxis");
@@ -233,6 +219,23 @@ bool Parser::parseCreateSent() {
         return false;
     }
     string file = previous->lexema;
+    // ejecuta el create table
+    // ...
+    // libera la tabla para la sgte consulta
+    memoria["table"].clear();
+    return true;
+}
+
+bool Parser::parseIndexSent() {
+    if (!match(Token::ID)) {
+        throwParser("Parser error - Se espera un identificador");
+        return false;
+    }
+    if (!match(Token::ON)) {
+        throwParser("Parser error de sintaxis");
+        return false;
+    }
+    if (!parseTable()) return false;
     if (!match(Token::USING)) {
         throwParser("Parser error de sintaxis");
         return false;
@@ -241,21 +244,25 @@ bool Parser::parseCreateSent() {
         throwParser("Parser error de sintaxis");
         return false;
     }
-    if (match(Token::HASH) || match(Token::BTREE) || match(Token::SEQ)) {
-        string index_method = previous->lexema;
+    if (match(Token::HASH) || match(Token::ISAM) || match(Token::SEQ)) {
+        Token::Type token = previous->type;
         if (match(Token::LPAREN)) {
             if (!parseValue()) return false;
             if (!match(Token::RPAREN)) {
                 throwParser("Parser error - se espera cerra parentesis");
                 return false;
             }
-            // ejecuta el create table
+            // actualiza el index al atributo
+            indexes[memoria["table"][0]] = token;
+            // libera la tabla para la sgte consulta
+            memoria["table"].clear();
             return true;
         }
     }
     throwParser("Parser error de sintaxis");
     return false;
 }
+
 
 bool Parser::parseSelectSent() {
     if (!parseAtributes()) return false;
@@ -266,17 +273,58 @@ bool Parser::parseSelectSent() {
     if (!parseTable()) return false;
 
     if (match(Token::WHERE)) {
-        if (!parseCondition()) return false;
-        // ejecuta la seleccion
-        return true;
+        if (!parseAtribute()) return false;
+        if (match(Token::LESS) || match(Token::LESSEQUAL) || match(Token::GREATER) || match(Token::GREATEREQUAL) || match(Token::EQUAL)) {
+            Token::Type comparator = previous->type;
+            if (!parseValue()) return false;
+            // ejecuta la busqueda por rango
+            // ...
+            string atribute = memoria["atributes"][0];
+            string value = memoria["values"][0];
+            Token::Type atr_index = indexes[atribute];
+
+            memoria["table"].clear();
+            memoria["atributes"].clear();
+            return true;
+        } 
+        else if (match(Token::BETWEEN)) {
+            if (parseValue()) {
+
+                if (match(Token::AND) || match(Token::OR)) {
+                    if (!parseValue()) return false;
+                    // ejecuta la busqueda por rango
+                    memoria["table"].clear();
+                    memoria["atributes"].clear();
+                    return true;
+                } else {
+                    throwParser("Parser error - Se espera un comparador");
+                    return false;
+                }
+            } 
+            return false;
+        }
+        throwParser("Parser error - Se espera un comparador");
+        return false;
     }
+    // ejecuta el select
+    memoria["table"].clear();
+    memoria["atributes"].clear();
     return true;
 }
 
+
 bool Parser::parseSentence() {
     bool res;
-    if (match(Token::CREATE))
-        res = parseCreateSent();
+    if (match(Token::CREATE)) {
+        if (match(Token::TABLE)) {
+            res = parseCreateSent();
+        } else if (match(Token::INDEX)) {
+            res = parseIndexSent();
+        } else {
+            throwParser("Parser error de sintaxis");
+            return false;
+        }
+    }
     else if (match(Token::INSERT))
         res = parseInsertSent();
     else if (match(Token::DELETE))

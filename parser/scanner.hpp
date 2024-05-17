@@ -37,6 +37,7 @@ void Scanner::init_reserved() {
   reserved["select"] = Token::SELECT;
   reserved["from"] = Token::FROM;
   reserved["where"] = Token::WHERE;
+  reserved["on"] = Token::ON;
   reserved["file"] = Token::FILE;
   reserved["values"] = Token::VALUES;
   reserved["hash"] = Token::HASH;

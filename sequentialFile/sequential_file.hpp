@@ -16,22 +16,22 @@ class SequentialFile {
     string auxfile;
 
     // comparators
-    function<bool(const T &, const T &)> less;
-    function<bool(const T &, const T &)> greater;
-    function<bool(const T &, const T &)> equal;
-    function<bool(const T &, const Key &)> equal_key;
-    function<bool(const T &, const Key &)> less_key;
-    function<bool(const T &, const Key &)> greater_key;
+    function<bool(T &, T &)> less;
+    function<bool(T &, T &)> greater;
+    function<bool(T &, T &)> equal;
+    function<bool(T &, Key &)> equal_key;
+    function<bool(T &, Key &)> less_key;
+    function<bool(T &, Key &)> greater_key;
 
 public:
 
     SequentialFile(string datFilename, string auxFilename,
-                   function<bool(const T &, const T &)> less,
-                   function<bool(const T &, const T &)> greater,
-                   function<bool(const T &, const T & )> equal,
-                   function<bool(const T &, const Key &)> equal_key,
-                   function<bool(const T &, const Key &)> less_key,
-                   function<bool(const T &, const Key &)> greater_key) {
+                   function<bool(T &, T &)> less,
+                   function<bool(T &, T &)> greater,
+                   function<bool(T &, T &)> equal,
+                   function<bool(T &, Key &)> equal_key,
+                   function<bool(T &, Key &)> less_key,
+                   function<bool(T &, Key &)> greater_key) {
         this->datfile = datFilename;
         this->auxfile = auxFilename;
         ofstream file;
@@ -68,6 +68,17 @@ public:
         file.close();
     }
 
+    T get_max() {
+        ifstream file(this->datfile, ios::binary);
+        T record;
+        file.read((char*) &record, sizeof(T));
+        do {
+            record = readRecord(record.nextDel, record.nextFileChar);
+        }
+        while (record.nextDel != -1);
+        file.close();
+        return record;
+    }
 
     T readRecord(int pos, char fileChar) {
         T result;
@@ -357,7 +368,7 @@ public:
         return records;
     }
 
-    vector<T> range_search(Key k_begin, Key k_end) {
+    vector<T> range_search(Key k_begin, Key k_end, bool equal) {
         vector<T> result;
         fstream file(this->datfile, ios::in | ios::binary | ios::out);
         fstream aux(this->auxfile, ios::in | ios::binary | ios::out);
@@ -382,9 +393,9 @@ public:
         }
 
         // loop for matching keys in current reads
-        while (current < k_end || current == k_end) {  //a <= k_end
+        while (less_key(current, k_end) || (equal && equal_key(current, k_end))) {  //a <= k_end
        
-            if (current > k_begin || current == k_begin && current.nextDel != -2) //a >= k_begin
+            if (greater_key(current, k_end) || (equal && equal_key(current, k_end)) && current.nextDel != -2) //a >= k_begin
                 result.push_back(current); 
             
             if (current.nextDel == -1) break;

@@ -4,7 +4,9 @@
 #include <iostream>
 #include <cstring>
 #include <string>
+#include <vector>
 using namespace std;
+
 
 class Player{
 public:
@@ -64,6 +66,36 @@ public:
              << ", Team City: " << team_city << ", From Year: " << from_year
              << ", To Year: " << to_year << endl;
     }
+
+    vector<string> selectData(bool all, vector<int> pos_atributes) const {
+        vector<string> result;
+        string  _id = to_string(id),
+                _name = name,
+                _birthdate = birthdate,
+                _school = school,
+                _country = country,
+                _height = height,
+                _weight = to_string(weight),
+                _season_exp = to_string(season_exp),
+                _jersey = jersey,
+                _position = position,
+                _team_id = to_string(team_id),
+                _team_name = team_name,
+                _team_abbreviation = team_abbreviation,
+                _team_city = team_city,
+                _from_year = to_string(from_year),
+                _to_year = to_string(to_year);
+
+               
+        vector<string> values = {_id, _name, _birthdate, _school, _country, _height, _weight, _season_exp,
+           _jersey, _position, _team_id, _team_name, _team_abbreviation, _team_city, _from_year, _to_year};
+
+        if (all) for (int i: pos_atributes)
+            result.push_back(values[i]);
+        else 
+            return values;
+        return result;
+    }
 };
 
 
@@ -121,6 +153,36 @@ public:
              << "|| Team Name Away: " << team_name_away << "|| Matchup Away: " << matchup_away
              << "|| Points Away: " << pts_away << "|| Plus Minus Away: " << plus_minus_away
              << "|| Season Type: " << season_type << endl;
+    }
+
+    vector<string> selectData(bool all, vector<int> pos_atributes) const {
+        vector<string> result;
+        string  _season_id = to_string(season_id),
+                _team_id_home = to_string(team_id_home),
+                _team_abbreviation_home = team_abbreviation_home,
+                _team_name_home = team_name_home,
+                _id = to_string(id),
+                _game_date = game_date,
+                _matchup_home = matchup_home,
+                _pts_home = to_string(pts_home),
+                _plus_minus_home = to_string(plus_minus_home),
+                _team_id_away = to_string(team_id_away),
+                _team_abbreviation_away = team_abbreviation_away,
+                _team_name_away = team_name_away,
+                _matchup_away = matchup_away,
+                _pts_away = to_string(pts_away),
+                _plus_minus_away = to_string(plus_minus_away),
+                _season_type = season_type;
+
+               
+        vector<string> values = {_season_id, _team_id_home, _team_abbreviation_home, _team_name_home, _id,  _game_date, _matchup_home, _pts_home, _plus_minus_home,
+         _team_id_away, _team_abbreviation_away, _team_name_away, _matchup_away, _pts_away, _plus_minus_away, _season_type};
+
+        if (all) for (int i: pos_atributes)
+            result.push_back(values[i]);
+        else 
+            return values;
+        return result;
     }
 };
 #endif //FILEORGANIZATION_RECORD_H
