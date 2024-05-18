@@ -1,4 +1,5 @@
 #include  "record.hpp"
+#include "../utils/normal.hpp"
 
 class PlayerSeq: public Player {
 public:
@@ -16,10 +17,10 @@ public:
     Player(_id, _name, _birthdate, _school, _country, _height, _weight, _season_exp, 
            _jersey, _position, _team_id, _team_name, _team_abbreviation, _team_city, _from_year, _to_year) {}
 
-     PlayerSeq(vector<string> values): Player(stoll(values[0]), values[1], values[2], values[3],
-           values[4], values[5], stod(values[6]), stod(values[7]),
-           values[8], values[9], stoll(values[10]), values[11], values[12], values[13], 
-           stod(values[14]), stod(values[15])) {}
+     PlayerSeq(vector<string> values): Player(parseLongLong(values[0]), values[1], values[2], values[3],
+           values[4], values[5], parseDouble(values[6]), parseDouble(values[7]),
+           values[8], values[9], parseLongLong(values[10]), values[11], values[12], values[13], 
+           parseDouble(values[14]), parseDouble(values[15])) {}
 };
 
 
@@ -40,9 +41,9 @@ public:
          _team_id_away, _team_abbreviation_away, _team_name_away, _matchup_away, _pts_away, _plus_minus_away, _season_type) {}
 
     GameSeq(vector<string> values):
-        Game(stoll(values[0]), stoll(values[1]), values[2], values[3],
-           stoll(values[4]), values[5], values[6], stod(values[7]),
-           stod(values[8]), stoll(values[9]), values[10], values[11], values[12], 
-           stod(values[13]), stod(values[14]), values[15])
+        Game(parseLongLong(values[0]), parseLongLong(values[1]), values[2], values[3],
+           parseLongLong(values[4]), values[5], values[6], parseDouble(values[7]),
+           parseDouble(values[8]), parseLongLong(values[9]), values[10], values[11], values[12], 
+           parseDouble(values[13]), parseDouble(values[14]), values[15])
     {}
 };
