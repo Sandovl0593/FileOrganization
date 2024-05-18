@@ -32,6 +32,22 @@
 
 ### Extendible Hashing
 
+## Comandos SQL
+
+### `select ([atributes] | *) from [table];`
+
+### `select ([atributes] | *) from [table] where [k_atr] [>,<,>=,<=,=] [value];`
+
+### `select ([atributes] | *) from [table] where [k_atr] between [begin] and [end];`
+
+### `create table [table] from file [file_name];`
+
+### `create index [id] on [table] using [index_type]([atribute]);`
+
+### `insert into [table] values [atributes];`
+
+### `delete from [table] where [k_at] = [value];`
+
 ## Dataset
 Para el presente trabajo se hizo uso de dos CSV de la NBA dataset con ubicación en https://www.kaggle.com/datasets/wyattowalsh/basketball.
 
