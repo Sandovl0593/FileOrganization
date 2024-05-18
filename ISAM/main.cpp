@@ -109,38 +109,31 @@ void loadGamesFromCSV(const string& filename, ISAMFile& isam) {
 int main() {
     ISAMFile isam("data.dat");
 
+    // Ensure the CSV files are in the same directory as the executable
     string playerInfoFile = "PlayerInfo.csv";
     string gameFile = "Game.csv";
 
     loadPlayersFromCSV(playerInfoFile, isam);
     loadGamesFromCSV(gameFile, isam);
 
-    vector<Player> foundPlayers = isam.searchPlayer(1);
-    for (const auto& player : foundPlayers) {
-        player.showData();
-    }
 
-    vector<Game> foundGames = isam.searchGame(1);
-    for (const auto& game : foundGames) {
-        game.showData();
-    }
 
-    vector<Player> rangePlayers = isam.rangeSearchPlayer(1, 2);
+    vector<Player> rangePlayers = isam.rangeSearchPlayer(25, 50);
     for (const auto& player : rangePlayers) {
-        player.showData();
+        player.showData();    
     }
 
-    vector<Game> rangeGames = isam.rangeSearchGame(1, 2);
+    vector<Game> rangeGames = isam.rangeSearchGame(25, 50);
     for (const auto& game : rangeGames) {
         game.showData();
     }
 
-    bool removedPlayer = isam.removePlayer(1);
+    bool removedPlayer = isam.removePlayer(31);
     if (removedPlayer) {
         cout << "Player records removed successfully." << endl;
     }
 
-    bool removedGame = isam.removeGame(1);
+    bool removedGame = isam.removeGame(46);
     if (removedGame) {
         cout << "Game records removed successfully." << endl;
     }
