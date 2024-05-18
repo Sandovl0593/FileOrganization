@@ -115,9 +115,9 @@ Token* Scanner::nextToken() {
     }
   } 
   
-  else if (isalpha(c)) {
+  else if (isalpha(c) || c == '_') {
     c = nextChar();
-    while (isalpha(c))  c = nextChar();
+    while (isalpha(c) || c == '_')  c = nextChar();
     rollBack();
 
     string lex = getLexema();
@@ -160,7 +160,7 @@ Token* Scanner::nextToken() {
   } else {
     token = new Token(Token::ERR, c);
   }
-  // cout << "next token " << token << endl;
+  cout << "next token " << token << endl;
   return token;
 }
 

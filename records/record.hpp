@@ -57,7 +57,7 @@ public:
         team_city[sizeof(team_city) - 1] = '\0';
     }
 
-    void showData() const {
+    void showData()  {
         cout << "ID: " << id << ", Name: " << name << ", Birthdate: " << birthdate
              << ", School: " << school << ", Country: " << country << ", Height: " << height
              << ", Weight: " << weight << ", Season Experience: " << season_exp
@@ -67,7 +67,7 @@ public:
              << ", To Year: " << to_year << endl;
     }
 
-    vector<string> selectData(bool all, vector<int> pos_atributes) const {
+    vector<string> selectData(bool all, vector<int> pos_atributes)  {
         vector<string> result;
         string  _id = to_string(id),
                 _name = name,
@@ -146,7 +146,7 @@ public:
     }
 
 
-    void showData() const {
+    void showData()  {
         cout << "Season ID: " << season_id << "|| Team ID Home: " << team_id_home
              << "|| Team Abbreviation Home: " << team_abbreviation_home
              << "|| Team Name Home: " << team_name_home << "|| Game ID: " << id
@@ -158,7 +158,7 @@ public:
              << "|| Season Type: " << season_type << endl;
     }
 
-    vector<string> selectData(bool all, vector<int> pos_atributes) const {
+    vector<string> selectData(bool all, vector<int> pos_atributes)  {
         vector<string> result;
         string  _season_id = to_string(season_id),
                 _team_id_home = to_string(team_id_home),
@@ -181,8 +181,12 @@ public:
         vector<string> values = {_season_id, _team_id_home, _team_abbreviation_home, _team_name_home, _id,  _game_date, _matchup_home, _pts_home, _plus_minus_home,
          _team_id_away, _team_abbreviation_away, _team_name_away, _matchup_away, _pts_away, _plus_minus_away, _season_type};
 
-        if (!all) for (int i: pos_atributes) {
-            result.push_back(values[i]);
+        // for (auto i: values) cout << " " << i;
+        // cout << endl;
+        if (!all) {
+            for (int i: pos_atributes) {
+                result.push_back(values[i]);
+            }
             return result;
         }
         return values;

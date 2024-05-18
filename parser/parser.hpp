@@ -140,6 +140,7 @@ bool Parser::parseValues() {
 bool Parser::parseAtribute() {
     if (match(Token::ID)) {
         memoria["atributes"].push_back(previous->lexema);
+    cout << memoria["atributes"].back() << endl;
         return true;
     }
     throwParser("Parser error - Se espera un campo");
@@ -207,7 +208,19 @@ bool Parser::parseDeleteSent() {
             string atribute = memoria["atributes"].back();
             string value = memoria["values"].back();
             
-            bool execute = delete_query(table_name, atribute, value);
+            Token::Type pre_index;
+            if (memoria["table"][0] == "player")
+                pre_index = indexesPlayer[atribute];
+            else if (memoria["table"][0] == "game")
+                pre_index = indexesGame[atribute];
+            else {
+                report = "No existe la tabla con ese nombre";
+                memoria["table"].clear();
+                memoria["atributes"].clear();
+                return false;
+            }
+
+            bool execute = delete_query(table_name, atribute, value, pre_index);
 
             // libera la memoria para la sgte query
             clearMemory();
@@ -249,8 +262,6 @@ bool Parser::parseCreateSent() {
         report = "Ejecucion no completada";
         return false;
     }
-    return true;
-
     // libera la memoria para la sgte query
     memoria["table"].clear();
     return true;
@@ -318,9 +329,9 @@ bool Parser::parseSelectSent() {
             if (!parseValue()) return false;
 
             // ejecuta el select
+            string value = memoria["values"][0];
             string k_atrib = memoria["atributes"].back();
             memoria["atributes"].pop_back();
-            string value = memoria["values"][0];
             Token::Type atr_index; 
 
             if (memoria["table"][0] == "player")
@@ -340,6 +351,7 @@ bool Parser::parseSelectSent() {
                 vector<string> atributes = memoria["atributes"];
                 execute = select_query(memoria["table"][0], false, atributes, k_atrib, value, "", atr_index, comparator);
             }   
+
             clearMemory();
             if (!execute) {
                 report = "Ejecucion no completada";

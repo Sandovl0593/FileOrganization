@@ -1,5 +1,5 @@
-#ifndef FILEORGANIZATION_EXTENDIBLE_HASH_H
-#define FILEORGANIZATION_EXTENDIBLE_HASH_H
+#ifndef FILEORGANIZATION_SEQUENTIAL_FILE_H
+#define FILEORGANIZATION_SEQUENTIAL_FILE_H
 
 #include <iostream>
 #include <fstream>
@@ -54,22 +54,30 @@ public:
         startInstance(datFilename, auxFilename);
     };
 
-    SequentialFile(string datFilename, string auxFilename,
-                   function<bool(T &, T &)> less,
+    void updateComparator(function<bool(T &, T &)> less,
                    function<bool(T &, T &)> greater,
                    function<bool(T &, T &)> equal,
                    function<bool(T &, Key &)> equal_key,
                    function<bool(T &, Key &)> less_key,
                    function<bool(T &, Key &)> greater_key) {
-        startInstance(datFilename, auxFilename);
-
         this->less = less;
         this->greater = greater;
         this->equal = equal;
         this->equal_key = equal_key;
         this->less_key = less_key;
         this->greater_key = greater_key;
-    };
+    }
+
+    // SequentialFile(string datFilename, string auxFilename,
+    //                function<bool(T &, T &)> less,
+    //                function<bool(T &, T &)> greater,
+    //                function<bool(T &, T &)> equal,
+    //                function<bool(T &, Key &)> equal_key,
+    //                function<bool(T &, Key &)> less_key,
+    //                function<bool(T &, Key &)> greater_key) {
+    //     startInstance(datFilename, auxFilename);
+    //     updateComparator(less, greater, equal, equal_key, less_key, greater_key);
+    // };
 
     vector<T> getAll() {
         // cout << size_dat() << "-" << size_aux() << endl;
