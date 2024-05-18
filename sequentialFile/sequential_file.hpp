@@ -26,17 +26,27 @@ class SequentialFile {
     void startInstance(string datFilename, string auxFilename) {
         this->datfile = datFilename;
         this->auxfile = auxFilename;
-        ofstream file;
-        file.open(datFilename, ios::binary);
-        file.close();
-        file.open(auxFilename, ios::binary);
-        file.close();
+        fstream dat(datFilename, ios::in | ios::binary);
+        fstream aux(auxFilename, ios::in | ios::binary);
+        if (!dat) {
+            dat.close();
+            dat.open(datFilename, ios::out | ios::binary);
+            aux.close();
+            aux.open(auxFilename, ios::out | ios::binary);
+        }
 
-        file.open("metadata_seq.dat", ios::binary);
         int basesize = 0;
-        file.write((char*)&basesize, sizeof(int));  // datfile
-        file.write((char*)&basesize, sizeof(int));  // auxfile
-        file.close();
+        fstream met("metadata_seq.dat", ios::in | ios::binary);
+        if (!met) {
+            met.close();
+            met.open("metadata_seq.dat", ios::out | ios::binary);
+            met.write((char*)&basesize, sizeof(int));  // datfile
+            met.write((char*)&basesize, sizeof(int));  // auxfile
+        }
+
+        dat.close();
+        aux.close();
+        met.close();
     }
 
 public:
@@ -62,12 +72,18 @@ public:
     };
 
     vector<T> getAll() {
+        // cout << size_dat() << "-" << size_aux() << endl;
+        // printFile();
+        cout << endl;
         vector<T> all_records;
         ifstream file(this->datfile, ios::binary);
         T record;
+        bool header = true;
         file.read((char*) &record, sizeof(T));
         do {
-            all_records.push_back(record);
+            if (!header)
+                all_records.push_back(record);
+            header = false;
             record = readRecord(record.nextDel, record.nextFileChar);
         }
         while (record.nextDel != -1);
@@ -119,7 +135,7 @@ public:
 
 
     int size_dat() {
-        ifstream file("metadata.dat", ios::binary);
+        ifstream file("metadata_seq.dat", ios::binary);
         int size;
         file.seekg(0, ios::beg);
         file.read((char*)&size, sizeof(int));  // datfile
@@ -128,7 +144,7 @@ public:
     }
 
     int size_aux() {
-        ifstream file("metadata.dat", ios::binary);
+        ifstream file("metadata_seq.dat", ios::binary);
         int size;
         file.seekg(sizeof(int), ios::beg);
         file.read((char*)&size, sizeof(int));  // auxfile
@@ -137,7 +153,7 @@ public:
     }
 
     void updateSize(char fileChar, int rec) {
-        fstream file("metadata.dat", ios::in | ios::out | ios::binary);
+        fstream file("metadata_seq.dat", ios::in | ios::out | ios::binary);
         int currentsize;
 
         // cursor for read
@@ -203,7 +219,6 @@ public:
 
      void insertRecord(T record) {
         fstream file(this->datfile, ios::in | ios::out | ios::binary);
-
         if (size_dat() == 0) {
             // Cuando el file es empty
             T header;
@@ -228,7 +243,7 @@ public:
             file.seekg(0, ios::beg);
             file.read((char *)&next_record, sizeof(T));
 
-             while (greater(record, next_record)) {   
+             while (greater(record, next_record)) {
                 cur_record = next_record;
                 cur_pos = cur_next;
                 cur_char = cur_nextChar;

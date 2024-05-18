@@ -6,7 +6,7 @@ class Parser {
 private:
     Scanner* scanner;
     Token *current, *previous;
-    string report;
+    string report, reportFin;
     unordered_map<string, vector<string>> memoria;
     unordered_map<string, Token::Type> indexesPlayer;
     unordered_map<string, Token::Type> indexesGame;
@@ -55,17 +55,19 @@ void Parser::clearMemory() {
 
 void Parser::throwParser(string err) {
     if (report.empty()) report = err;
-    cout << report << endl;
+    // cout << report << endl;
     clearMemory();
 }
 
-string Parser::reportParse() { return report; }
+string Parser::reportParse() { return reportFin; }
 
 void Parser::resetParser() {
     scanner->resetScanner();
     if (current)  delete current;
     if (previous) delete previous;
     current = previous = NULL;
+    reportFin = report;
+    report = "";
 }
 
 // match and consume next token
@@ -181,7 +183,7 @@ bool Parser::parseInsertSent() {
         memoria["values"].clear();
         memoria["table"].clear();
         if (!execute) {
-            report = "Ejecución no completa";
+            report = "Ejecucion no completada";
             return false;
         }
         return true;
@@ -210,7 +212,7 @@ bool Parser::parseDeleteSent() {
             // libera la memoria para la sgte query
             clearMemory();
             if (!execute) {
-                report = "Ejecución no completa";
+                report = "Ejecucion no completada";
                 return false;
             }
             return true;
@@ -244,7 +246,7 @@ bool Parser::parseCreateSent() {
     // libera la memoria para la sgte query
     clearMemory();
     if (!execute) {
-        report = "Ejecución no completa";
+        report = "Ejecucion no completada";
         return false;
     }
     return true;
@@ -340,7 +342,7 @@ bool Parser::parseSelectSent() {
             }   
             clearMemory();
             if (!execute) {
-                report = "Ejecución no completa";
+                report = "Ejecucion no completada";
                 return false;
             }
             return true;
@@ -376,7 +378,7 @@ bool Parser::parseSelectSent() {
                     }
                     clearMemory();
                     if (!execute) {
-                        report = "Ejecución no completa";
+                        report = "Ejecucion no completada";
                         return false;
                     }
                     return true;
@@ -401,7 +403,7 @@ bool Parser::parseSelectSent() {
 
     clearMemory();
     if (!execute) {
-        report = "Ejecución no completa";
+        report = "Ejecucion no completada";
         return false;
     }
     return true;
@@ -431,7 +433,7 @@ bool Parser::parseSentence() {
         return false;
     }
     if (!match(Token::PTCOMMA)) {
-        throwParser("Parser error - Falta el ptcomma amig@");
+        throwParser("Ok pero Falta el ptcomma amig@");
         return false;
     }
     return res;
@@ -443,7 +445,7 @@ void Parser::parse() {
     current = scanner->nextToken();
     if (check(Token::ERR)) {
         throwParser("Error en scanner - caracter invalido");
-        cout << report << endl;
+        // cout << report << endl;
         resetParser();
         return;
     }
@@ -451,7 +453,8 @@ void Parser::parse() {
     bool res = parseSentence();
 
     if (!res) { 
-        cout << report << endl;
+        // cout << report << endl;
+        reportFin = report;
         resetParser();
         return;
     }
@@ -459,12 +462,12 @@ void Parser::parse() {
     if (!match(Token::END)) {
         ostringstream os; os << current;
         throwParser("Error: Esperaba fin de input, encontro: " + os.str());
-        cout << report << endl;
+        // cout << report << endl;
         resetParser();
         return;
     }
 
-    throwParser("Ejecución completada");
-    cout << report << endl;
+    throwParser("Ejecucion completada");
+    // cout << report << endl;
     resetParser();
 }

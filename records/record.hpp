@@ -117,29 +117,29 @@ public:
             pts_home(_pts_home), plus_minus_home(_plus_minus_home), team_id_away(_team_id_away),
             pts_away(_pts_away), plus_minus_away(_plus_minus_away) {
 
-        strncpy(team_abbreviation_home, _team_abbreviation_home.c_str(), sizeof(team_abbreviation_home) - 1);
-        team_abbreviation_home[sizeof(team_abbreviation_home) - 1] = '\0';
+        strcpy(team_abbreviation_home, _team_abbreviation_home.c_str());
+        team_abbreviation_home[3] = '\0';
 
-        strncpy(team_name_home, _team_name_home.c_str(), sizeof(team_name_home) - 1);
-        team_name_home[sizeof(team_name_home) - 1] = '\0';
+        strcpy(team_name_home, _team_name_home.c_str());
+        team_name_home[22] = '\0';
 
-        strncpy(game_date, _game_date.c_str(), sizeof(game_date) - 1);
-        game_date[sizeof(game_date) - 1] = '\0';
+        strcpy(game_date, _game_date.c_str());
+        game_date[10] = '\0';
 
-        strncpy(matchup_home, _matchup_home.c_str(), sizeof(matchup_home) - 1);
-        matchup_home[sizeof(matchup_home) - 1] = '\0';
+        strcpy(matchup_home, _matchup_home.c_str());
+        matchup_home[11] = '\0';
 
-        strncpy(team_abbreviation_away, _team_abbreviation_away.c_str(), sizeof(team_abbreviation_away) - 1);
-        team_abbreviation_away[sizeof(team_abbreviation_away) - 1] = '\0';
+        strcpy(team_abbreviation_away, _team_abbreviation_away.c_str());
+        team_abbreviation_away[3] = '\0';
 
-        strncpy(team_name_away, _team_name_away.c_str(), sizeof(team_name_away) - 1);
-        team_name_away[sizeof(team_name_away) - 1] = '\0';
+        strcpy(team_name_away, _team_name_away.c_str());
+        team_name_away[25] = '\0';
 
-        strncpy(matchup_away, _matchup_away.c_str(), sizeof(matchup_away) - 1);
-        matchup_away[sizeof(matchup_away) - 1] = '\0';
+        strcpy(matchup_away, _matchup_away.c_str());
+        matchup_away[9] = '\0';
 
-        strncpy(season_type, _season_type.c_str(), sizeof(season_type) - 1);
-        season_type[sizeof(season_type) - 1] = '\0';
+        strcpy(season_type, _season_type.c_str());
+        season_type[14] = '\0';
     }
 
 

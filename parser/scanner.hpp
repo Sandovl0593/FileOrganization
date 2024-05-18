@@ -160,7 +160,7 @@ Token* Scanner::nextToken() {
   } else {
     token = new Token(Token::ERR, c);
   }
-  cout << "next token " << token << endl;
+  // cout << "next token " << token << endl;
   return token;
 }
 

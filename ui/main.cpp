@@ -14,6 +14,7 @@ int main() {
         parser.setInput(query);
         cout << endl;
         parser.parse();
+        cout << parser.reportParse() << endl;
         cout << endl;
     }
 }
