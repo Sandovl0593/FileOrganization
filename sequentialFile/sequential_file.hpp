@@ -359,7 +359,7 @@ public:
 
         file.close();
 
-        if (records.empty()) {
+        if (!record) {
             // si no existe en el file, do linear search in aux file
             fstream aux(this->auxfile, ios::in | ios::binary);
             while (aux.read((char*)&record, sizeof(T))) {

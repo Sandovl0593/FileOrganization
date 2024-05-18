@@ -12,7 +12,7 @@ public:
   Scanner(const char* in_s);
   Token* nextToken();
   void resetScanner();
-  void setInput(const char* new_s);
+  void setInput(string new_s);
   ~Scanner();  
 private:
   string input;
@@ -41,7 +41,6 @@ void Scanner::init_reserved() {
   reserved["file"] = Token::FILE;
   reserved["values"] = Token::VALUES;
   reserved["hash"] = Token::HASH;
-  reserved["btree"] = Token::BTREE;
   reserved["seq"] = Token::SEQ;
   reserved["and"] = Token::AND;
   reserved["or"] = Token::OR;
@@ -60,7 +59,7 @@ Scanner::Scanner(const char* in_s): input(in_s), first(0), current(0) {
   init_reserved();
 }
 
-void Scanner::setInput(const char* new_s) {
+void Scanner::setInput(string new_s) {
   this->input = new_s;
 }
 

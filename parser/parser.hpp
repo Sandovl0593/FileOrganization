@@ -8,7 +8,8 @@ private:
     Token *current, *previous;
     string report;
     unordered_map<string, vector<string>> memoria;
-    unordered_map<string, Token::Type> indexes;
+    unordered_map<string, Token::Type> indexesPlayer;
+    unordered_map<string, Token::Type> indexesGame;
 
     bool match(Token::Type ttype);
     bool check(Token::Type ttype);
@@ -38,7 +39,13 @@ public:
     Parser(Scanner* scanner);
     void parse();
     string reportParse();
+    void setInput(string input);
+
 };
+
+void Parser::setInput(string value) {
+    scanner->setInput(value);
+}
 
 void Parser::clearMemory() {
     memoria["atributes"].clear();
@@ -170,7 +177,7 @@ bool Parser::parseInsertSent() {
         vector<string> values = memoria["values"];
         bool execute = insert_values(memoria["table"][0], values);
 
-        // libera la tabla para la sgte query
+        // libera la memoria para la sgte query
         memoria["values"].clear();
         memoria["table"].clear();
         if (!execute) {
@@ -194,14 +201,22 @@ bool Parser::parseDeleteSent() {
         if (match(Token::EQUAL)) {
             if (!parseValue()) return false;
             // ejecuta el remove
-            // ...
-            // libera la tabla para la sgte query
-            memoria["table"].clear();
-            memoria["atributes"].clear();
+            string table_name = memoria["table"][0];
+            string atribute = memoria["atributes"].back();
+            string value = memoria["values"].back();
+            
+            bool execute = delete_query(table_name, atribute, value);
+
+            // libera la memoria para la sgte query
+            clearMemory();
+            if (!execute) {
+                report = "Ejecución no completa";
+                return false;
+            }
             return true;
         } 
-        memoria["table"].clear();
-        return true;
+        throwParser("Parser error de sintaxis");
+        return false;
     }
     throwParser("Parser error - se espera WHERE");
     return false;
@@ -224,8 +239,17 @@ bool Parser::parseCreateSent() {
     string table_name = memoria["table"][0];
     string file = previous->lexema;
     // ejecuta el create table  
-    // ...
-    // libera la tabla para la sgte query
+    bool execute = create_table(table_name, file);
+
+    // libera la memoria para la sgte query
+    clearMemory();
+    if (!execute) {
+        report = "Ejecución no completa";
+        return false;
+    }
+    return true;
+
+    // libera la memoria para la sgte query
     memoria["table"].clear();
     return true;
 }
@@ -244,22 +268,30 @@ bool Parser::parseIndexSent() {
         throwParser("Parser error de sintaxis");
         return false;
     }
-    if (!match(Token::INDEX)) {
-        throwParser("Parser error de sintaxis");
-        return false;
-    }
     if (match(Token::HASH) || match(Token::ISAM) || match(Token::SEQ)) {
         Token::Type token = previous->type;
         if (match(Token::LPAREN)) {
-            if (!parseValue()) return false;
+            if (!parseAtribute()) return false;
             if (!match(Token::RPAREN)) {
                 throwParser("Parser error - se espera cerra parentesis");
                 return false;
             }
             // actualiza el index al atributo
-            indexes[memoria["table"][0]] = token;
-            // libera la tabla para la sgte query
+            string atribute = memoria["atributes"].back();
+            if (memoria["table"][0] == "player")
+                indexesPlayer[atribute] = token;
+            else if (memoria["table"][0] == "game")
+                indexesGame[atribute] = token;
+            else {
+                report = "No existe la tabla con ese nombre";
+                memoria["table"].clear();
+                memoria["atributes"].clear();
+                return false;
+            }
+
+            // libera la memoria para la sgte query
             memoria["table"].clear();
+            memoria["atributes"].clear();
             return true;
         }
     }
@@ -286,16 +318,26 @@ bool Parser::parseSelectSent() {
             // ejecuta el select
             string k_atrib = memoria["atributes"].back();
             memoria["atributes"].pop_back();
-            vector<string> atributes = memoria["atributes"];
             string value = memoria["values"][0];
-            Token::Type atr_index = indexes[k_atrib];
+            Token::Type atr_index; 
+
+            if (memoria["table"][0] == "player")
+                atr_index = indexesPlayer[k_atrib];
+            else if (memoria["table"][0] == "game")
+                atr_index = indexesGame[k_atrib];
+            else {
+                report = "No existe la tabla con ese nombre";
+                clearMemory();
+                return false;
+            }
 
             bool execute;
             if (check_atr == 2) 
-                execute = select_query(memoria["table"][0], true, atributes, k_atrib, value, "", atr_index, comparator);
-            else
+                execute = select_query(memoria["table"][0], true, {}, k_atrib, value, "", atr_index, comparator);
+            else {
+                vector<string> atributes = memoria["atributes"];
                 execute = select_query(memoria["table"][0], false, atributes, k_atrib, value, "", atr_index, comparator);
-
+            }   
             clearMemory();
             if (!execute) {
                 report = "Ejecución no completa";
@@ -313,15 +355,25 @@ bool Parser::parseSelectSent() {
                     memoria["atributes"].pop_back();
                     string begin = memoria["values"][0];
                     string end = memoria["values"][1];
-                    vector<string> atributes = memoria["atributes"];
-                    Token::Type atr_index = indexes[k_atrib];
+                    Token::Type atr_index; 
+
+                    if (memoria["table"][0] == "player")
+                        atr_index = indexesPlayer[k_atrib];
+                    else if (memoria["table"][0] == "game")
+                        atr_index = indexesGame[k_atrib];
+                    else {
+                        report = "No existe la tabla con ese nombre";
+                        clearMemory();
+                        return false;
+                    }
 
                     bool execute;
                     if (check_atr == 2) 
-                        execute = select_query(memoria["table"][0], true, atributes, k_atrib, begin, end, atr_index, Token::BETWEEN);
-                    else
+                        execute = select_query(memoria["table"][0], true, {}, k_atrib, begin, end, atr_index, Token::BETWEEN);
+                    else {
+                        vector<string> atributes = memoria["atributes"];
                         execute = select_query(memoria["table"][0], false, atributes, k_atrib, begin, end, atr_index, Token::BETWEEN);
-
+                    }
                     clearMemory();
                     if (!execute) {
                         report = "Ejecución no completa";
@@ -339,10 +391,19 @@ bool Parser::parseSelectSent() {
         return false;
     }
     // ejecuta el select
+    bool execute;
+    if (check_atr == 2) 
+        execute = select_allrows(memoria["table"][0], true, {});
+    else {
+        vector<string> atributes = memoria["atributes"];
+        execute = select_allrows(memoria["table"][0], false, atributes);
+    }
 
-
-    memoria["table"].clear();
-    memoria["atributes"].clear();
+    clearMemory();
+    if (!execute) {
+        report = "Ejecución no completa";
+        return false;
+    }
     return true;
 }
 

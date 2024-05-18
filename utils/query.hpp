@@ -112,8 +112,9 @@ bool select_query(string table, bool all_at, vector<string> atributes, string k_
             cout << " |" << endl;
         }
 
+    } else {
+        cout << "No existe tabla con ese nombre" << endl; return false;
     }
-    cout << "No existe tabla con ese nombre"; return false;
 }
 
 
@@ -166,8 +167,9 @@ bool select_allrows(string table, bool all_at, vector<string> atributes) {
             for (auto &data: sel_record) cout << " | " << data;
             cout << " |" << endl;
         }
+    } else {
+        cout << "No existe tabla con ese nombre" << endl; return false;
     }
-    cout << "No existe tabla con ese nombre"; return false;
 }
 
 
@@ -206,8 +208,9 @@ bool insert_values(string table, vector<string> values) {
         // ...
 
         return true;
-    } 
-    cout << "No existe tabla con ese nombre"; return false;
+    } else {
+        cout << "No existe tabla con ese nombre" << endl; return false;
+    }
 }
 
 
@@ -217,7 +220,7 @@ bool create_table(string table, string data_file) {
         // ------ other structures
         // ....
 
-        ifstream csvFile("../dataset/PlayerInfo.csv");
+        ifstream csvFile(data_file);
         string line, cell;
         vector<string> row;
 
@@ -241,7 +244,7 @@ bool create_table(string table, string data_file) {
         // ------ other structures
         // ....
 
-        ifstream csvFile("../dataset/game.csv");
+        ifstream csvFile(data_file);
         string line, cell;
         vector<string> row;
 
@@ -259,8 +262,9 @@ bool create_table(string table, string data_file) {
 
             row.clear();
         }
+    } else {
+        cout << "No existe estas tablas en el sistema" << endl; return false;
     }
-    cout << "No existe tabla con ese nombre"; return false;
 }
 
 
@@ -301,6 +305,7 @@ bool delete_query(string table, string atribute, string value) {
         }
 
         return true;
+    } else {
+        cout << "No existe tabla con ese nombre" << endl; return false;
     }
-    cout << "No existe tabla con ese nombre"; return false;
 } 

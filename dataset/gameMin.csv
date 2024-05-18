@@ -1,0 +1,9 @@
+season_id,team_id_home,team_abbreviation_home,team_name_home,game_id,game_date,matchup_home,pts_home,plus_minus_home,team_id_away,team_abbreviation_away,team_name_away,matchup_away,pts_away,plus_minus_away,season_type
+22017,1610612750,MIN,Minnesota Timberwolves,0021700548,2018-01-01T00:00:00Z,MIN vs. LAL,114,18,1610612747,LAL,Los Angeles Lakers,LAL @ MIN,96,-18,Regular Season
+22017,1610612741,CHI,Chicago Bulls,0021700547,2018-01-01T00:00:00Z,CHI vs. POR,120,-4,1610612757,POR,Portland Trail Blazers,POR @ CHI,124,4,Regular Season
+22017,1610612761,TOR,Toronto Raptors,0021700546,2018-01-01T00:00:00Z,TOR vs. MIL,131,4,1610612749,MIL,Milwaukee Bucks,MIL @ TOR,127,-4,Regular Season
+22017,1610612751,BKN,Brooklyn Nets,0021700545,2018-01-01T00:00:00Z,BKN vs. ORL,98,3,1610612753,ORL,Orlando Magic,ORL @ BKN,95,-3,Regular Season
+22017,1610612752,NYK,New York Knicks,0021700550,2018-01-02T00:00:00Z,NYK vs. SAS,91,-9,1610612759,SAS,San Antonio Spurs,SAS @ NYK,100,9,Regular Season
+22017,1610612758,SAC,Sacramento Kings,0021700552,2018-01-02T00:00:00Z,SAC vs. CHA,111,-20,1610612766,CHA,Charlotte Hornets,CHA @ SAC,131,20,Regular Season
+22017,1610612746,LAC,LA Clippers,0021700553,2018-01-02T00:00:00Z,LAC vs. MEM,113,8,1610612763,MEM,Memphis Grizzlies,MEM @ LAC,105,-8,Regular Season
+22017,1610612756,PHX,Phoenix Suns,0021700551,2018-01-02T00:00:00Z,PHX vs. ATL,104,1,1610612737,ATL,Atlanta Hawks,ATL @ PHX,103,-1,Regular Season
