@@ -10,14 +10,14 @@ using namespace std;
 class ISAMFile {
 private:
     string filename;
-    map<long long, vector<long> > playerIndex; // map player id to file positions
-    map<long long, vector<long> > gameIndex;   // map game id to file positions
+    map<long long, vector<long> > playerIndex; // mapear el id del player a la posicion en el archivo
+    map<long long, vector<long> > gameIndex;   // mapear el id del juego a la posicion en el archivo
 
     template <typename T>
     void loadIndex(map<long long, vector<long> >& index) {
         ifstream ifs(filename.c_str(), ios::binary);
         if (!ifs.is_open()) {
-            ofstream ofs(filename.c_str()); // Create file if not exists
+            ofstream ofs(filename.c_str()); // Creo el archivo si no existe
             return;
         }
 
@@ -117,7 +117,6 @@ public:
             ifs.seekg(pos);
             Player player;
             ifs.read(reinterpret_cast<char*>(&player), sizeof(player));
-            // Here we set a flag or handle the deletion appropriately
             ofs.seekp(pos);
             ofs.write(reinterpret_cast<const char*>(&player), sizeof(player));
             ifs.close();
@@ -138,7 +137,7 @@ public:
             ifs.seekg(pos);
             Game game;
             ifs.read(reinterpret_cast<char*>(&game), sizeof(game));
-            // Here we set a flag or handle the deletion appropriately
+            // Aqui seteo un flag para manegar el borrado apropiadamente
             ofs.seekp(pos);
             ofs.write(reinterpret_cast<const char*>(&game), sizeof(game));
             ifs.close();
