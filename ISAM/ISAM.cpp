@@ -12,13 +12,13 @@ struct Record {
     bool deleted;
 
     Record(int _id = 0, string _name = "", bool _deleted = true)
-    : id(_id), name(_name), deleted(_deleted) {}
+        : id(_id), name(_name), deleted(_deleted) {}
 };
 
 class ISAMFile {
 private:
     string filename;
-    map<int, vector<long> > index; // mapea la clave con la posición en el archivo
+    map<int, vector<long> > index;
 
 public:
     ISAMFile(const string& filename) : filename(filename) {
@@ -28,7 +28,7 @@ public:
     void loadIndex() {
         ifstream ifs(filename, ios::binary);
         if (!ifs.is_open()) {
-            ofstream ofs(filename); // Crea archivo temp si no existe
+            ofstream ofs(filename);
             return;
         }
 
@@ -46,36 +46,36 @@ public:
     vector<Record> search(int key) {
         vector<Record> results;
         if (index.find(key) != index.end()) {
+            ifstream ifs(filename, ios::binary);
             for (auto pos : index[key]) {
-                ifstream ifs(filename, ios::binary);
                 ifs.seekg(pos);
                 Record record;
                 ifs.read(reinterpret_cast<char*>(&record), sizeof(record));
                 if (!record.deleted) {
                     results.push_back(record);
                 }
-                ifs.close();
             }
+            ifs.close();
         }
         return results;
     }
 
     vector<Record> rangeSearch(int beginKey, int endKey) {
         vector<Record> results;
+        ifstream ifs(filename, ios::binary);
         auto it = index.lower_bound(beginKey);
         while (it != index.end() && it->first <= endKey) {
             for (auto pos : it->second) {
-                ifstream ifs(filename, ios::binary);
                 ifs.seekg(pos);
                 Record record;
                 ifs.read(reinterpret_cast<char*>(&record), sizeof(record));
                 if (!record.deleted) {
                     results.push_back(record);
                 }
-                ifs.close();
             }
             ++it;
         }
+        ifs.close();
         return results;
     }
 
@@ -92,17 +92,15 @@ public:
     bool remove(int key) {
         if (index.find(key) == index.end()) return false;
         bool removed = false;
-        for (auto& pos : index[key]) {
-            ifstream ifs(filename, ios::binary);
-            ofstream ofs(filename, ios::binary | ios::in);
-            ifs.seekg(pos);
+        for (auto pos : index[key]) {
+            fstream fs(filename, ios::binary | ios::in | ios::out);
+            fs.seekg(pos);
             Record record;
-            ifs.read(reinterpret_cast<char*>(&record), sizeof(record));
+            fs.read(reinterpret_cast<char*>(&record), sizeof(record));
             record.deleted = true;
-            ofs.seekp(pos);
-            ofs.write(reinterpret_cast<const char*>(&record), sizeof(record));
-            ifs.close();
-            ofs.close();
+            fs.seekp(pos);
+            fs.write(reinterpret_cast<const char*>(&record), sizeof(record));
+            fs.close();
             removed = true;
         }
         index.erase(key);
