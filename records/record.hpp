@@ -64,6 +64,9 @@ public:
              << ", Team City: " << team_city << ", From Year: " << from_year
              << ", To Year: " << to_year << endl;
     }
+    bool operator==(const Player& other) const {
+        return id == other.id;  // Comparación de atributos relevantes
+    }
 };
 
 
@@ -121,6 +124,9 @@ public:
              << "|| Team Name Away: " << team_name_away << "|| Matchup Away: " << matchup_away
              << "|| Points Away: " << pts_away << "|| Plus Minus Away: " << plus_minus_away
              << "|| Season Type: " << season_type << endl;
+    }
+    bool operator==(const Game& other) const {
+        return id == other.id;  // Comparación de atributos relevantes
     }
 };
 #endif //FILEORGANIZATION_RECORD_H
