@@ -96,6 +96,9 @@ public:
         }
         return values;
     }
+    bool operator==(const Player& other) const {
+        return id == other.id;  // Comparación de atributos relevantes
+    }
 };
 
 
@@ -183,6 +186,9 @@ public:
             return result;
         }
         return values;
+    }
+    bool operator==(const Game& other) const {
+        return id == other.id;  // Comparación de atributos relevantes
     }
 };
 #endif //FILEORGANIZATION_RECORD_H
