@@ -1,6 +1,19 @@
-#include <iostream>
+#include "../parser/parser.hpp"
 using namespace std;
 
-int main(int argc) {
-    return 0;
+int main() {
+    
+    cout << "-- Ejecutando interfaz SQL --\n";
+    string query;
+    Scanner scanner;
+    Parser parser(&scanner);
+    while (true) {
+        cout << ">> ";
+        getline(cin, query);
+        if (query == "exit") break;
+        parser.setInput(query);
+        cout << endl;
+        parser.parse();
+        cout << endl;
+    }
 }
