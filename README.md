@@ -93,13 +93,18 @@ El segundo CSV es sobre los partidos jugados en la liga en los últimos 5 años,
 </ul>
 
 
+
+
 ## Integrantes
 
 <div align="center">
 
 |        |        |       |
 |:------:|:------:|:------:|
-|Espinoza Herrera,<bR>Marcela|Sandoval Huamaní,<br>Adrian|Guillén Rodriguez,<br>Fernando 
+|Espinoza Herrera,<br>Marcela|Sandoval Huamaní,<br>Adrian|Guillén Rodriguez,<br>Fernando|
+| Ximena Nicolle<br>Lindo Peña | | |
+
 </div>
+
 
 <a href="#top">Back to top 🔼</a>
