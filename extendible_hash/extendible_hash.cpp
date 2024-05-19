@@ -315,7 +315,7 @@ template <typename TK, typename T>
 extendible_hash<TK,T>:: ~extendible_hash(){this->saveIndex();}
 
 
-int main() {
+/*int main() {
     extendible_hash<Player,Bucket_P> hashq("prueba.dat", "indices.dat", "id");
     //Game game(1, 101, "T1", "Team1", 1001, "2021-12-12", "H", 55.5, 5.5, 102, "T2", "Team2", "A", 50.0, 4.0, "Season");
 
@@ -351,6 +351,6 @@ int main() {
     /*cout<<"PROBANDO"<<endl;
     auto result = hashq.search(27);
     for (auto p:result) p.showData();*/
-    hashq.getData();
-}
+    //hashq.getData();
+//}
 

@@ -110,7 +110,7 @@ void extendible_hash<TK,T>::getData(){
 
 template <typename TK, typename T>
 void extendible_hash<TK,T>::saveIndex() {
-    ofstream indexFile(this->indexname, std::ios::out | std::ios::binary );
+    ofstream indexFile(this->indexname, ios::out | ios::binary );
     if (!indexFile.is_open()) {
         cout<< "Error opening index file for writing: " << indexname << endl;
         return;
