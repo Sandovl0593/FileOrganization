@@ -2,6 +2,7 @@
 // otras estructuras
 #include "../records/record_seq.hpp"
 #include "../parser/scanner.hpp"
+#include <algorithm>
 // otros sel_records
 
 const vector<string> at_player = {"id", "name", "birthdate", "school", "country", "height", "weight", "season_exp",
