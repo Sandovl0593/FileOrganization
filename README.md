@@ -99,7 +99,7 @@ El segundo CSV es sobre los partidos jugados en la liga en los últimos 5 años,
 
 |        |        |       |
 |:------:|:------:|:------:|
-|Espinoza Herrera,<bR>Marcela|Sandoval Huamaní,<br>Adrian|Guillén Rodriguez,<br>Fernando 
+|Espinoza Herrera,<bR>Marcela|Sandoval Huamaní,<br>Adrian|Guillén Rodriguez,<br>Fernando <br>Ximena Nicolle Lindo Peña
 </div>
 
 <a href="#top">Back to top 🔼</a>
