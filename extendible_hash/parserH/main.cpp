@@ -1,7 +1,7 @@
-#include "parser.h"
+#include "../extendible_hash/parserH/parser.h"
 using namespace std;
 
-int main() {
+/*int main() {
 
     cout << "-- Ejecutando interfaz SQL --\n";
     string query;
@@ -17,4 +17,4 @@ int main() {
         cout << parser.reportParse() << endl;
         cout << endl;
     }
-}
+}*/

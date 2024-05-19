@@ -1,6 +1,6 @@
 #ifndef FILEORGANIZATION_PARSER_H
 #define FILEORGANIZATION_PARSER_H
-#include "query.h"
+#include "../extendible_hash/parserH/query.h"
 #include <vector>
 
 
@@ -224,7 +224,7 @@ bool Parser::parseDeleteSent() {
                 return false;
             }
 
-            bool execute = delete_query(table_name, atribute, value, pre_index);
+            bool execute = delete_query(table_name,value);
 
             // libera la memoria para la sgte query
             clearMemory();
@@ -330,8 +330,7 @@ bool Parser::parseSelectSent() {
 
     if (match(Token::WHERE)) {
         if (!parseAtribute()) return false;
-        if (match(Token::LESS) || match(Token::LESSEQUAL) || match(Token::GREATER) || match(Token::GREATEREQUAL) || match(Token::EQUAL)) {
-            Token::Type comparator = previous->type;
+        if (match(Token::EQUAL)) {
             if (!parseValue()) return false;
 
             // ejecuta el select
@@ -340,11 +339,7 @@ bool Parser::parseSelectSent() {
             memoria["atributes"].pop_back();
             Token::Type atr_index;
 
-            if (memoria["table"][0] == "player")
-                atr_index = indexesPlayer[k_atrib];
-            else if (memoria["table"][0] == "game")
-                atr_index = indexesGame[k_atrib];
-            else {
+            if (memoria["table"][0] != "player" and memoria["table"][0] == "game"){
                 report = "No existe la tabla con ese nombre";
                 clearMemory();
                 return false;
@@ -352,10 +347,10 @@ bool Parser::parseSelectSent() {
 
             bool execute;
             if (check_atr == 2)
-                execute = select_query(memoria["table"][0], true, {}, k_atrib, value, "", atr_index, comparator);
+                execute = select_query(memoria["table"][0], value);
             else {
-                vector<string> atributes = memoria["atributes"];
-                execute = select_query(memoria["table"][0], false, atributes, k_atrib, value, "", atr_index, comparator);
+                cout<<"OPERACION NO SOPORTADA"<<endl; //debe buscarse por el índice
+                return false;
             }
 
             clearMemory();
@@ -364,67 +359,15 @@ bool Parser::parseSelectSent() {
                 return false;
             }
             return true;
-        }
-        else if (match(Token::BETWEEN)) {
-            if (parseValue()) {
-                if (match(Token::AND)) {
-                    if (!parseValue()) return false;
-
-                    // ejecuta el select
-                    string k_atrib = memoria["atributes"].back();
-                    memoria["atributes"].pop_back();
-                    string begin = memoria["values"][0];
-                    string end = memoria["values"][1];
-                    Token::Type atr_index;
-
-                    if (memoria["table"][0] == "player")
-                        atr_index = indexesPlayer[k_atrib];
-                    else if (memoria["table"][0] == "game")
-                        atr_index = indexesGame[k_atrib];
-                    else {
-                        report = "No existe la tabla con ese nombre";
-                        clearMemory();
-                        return false;
-                    }
-
-                    bool execute;
-                    if (check_atr == 2)
-                        execute = select_query(memoria["table"][0], true, {}, k_atrib, begin, end, atr_index, Token::BETWEEN);
-                    else {
-                        vector<string> atributes = memoria["atributes"];
-                        execute = select_query(memoria["table"][0], false, atributes, k_atrib, begin, end, atr_index, Token::BETWEEN);
-                    }
-                    clearMemory();
-                    if (!execute) {
-                        report = "Ejecucion no completada";
-                        return false;
-                    }
-                    return true;
-                } else {
-                    throwParser("Parser error - Se espera un comparador");
-                    return false;
-                }
-            }
+        }else{
+            cout<<"Operación no soportada "<<endl;
             return false;
         }
-        throwParser("Parser error - Se espera un comparador");
+    }else{
+        cout<<"Operación no soportada "<<endl;
         return false;
-    }
-    // ejecuta el select
-    bool execute;
-    if (check_atr == 2)
-        execute = select_allrows(memoria["table"][0], true, {});
-    else {
-        vector<string> atributes = memoria["atributes"];
-        execute = select_allrows(memoria["table"][0], false, atributes);
     }
 
-    clearMemory();
-    if (!execute) {
-        report = "Ejecucion no completada";
-        return false;
-    }
-    return true;
 }
 
 
