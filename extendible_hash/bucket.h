@@ -1,41 +1,41 @@
 #ifndef FILEORGANIZATION_BUCKET_H
 #define FILEORGANIZATION_BUCKET_H
 #include "../records/record.hpp"
-#define DF 2
+#define DF 6
 const int DEPTH = 2;
 
 
 struct Bucket_G{
-    Game games[DF];
+    Game elements[DF];
     int size;
     int nextBucket;
     Bucket_G(){
         this->size = 0;
         this->nextBucket = -1;
     }
-    void showDataG(){
+    void showData(){
         cout<<"Bucket "<<endl;
         for(int i = 0; i < size; i++){
-            games[i].showData();
+            elements[i].showData();
         }
     }
     ~Bucket_G(){}
 };
 
 struct Bucket_P{
-        Player player[DF];
-        int size;
-        int nextBucket;
-        Bucket_P(){
-            this->size = 0;
-            this->nextBucket = -1;
+    Player elements[DF];
+    int size;
+    int nextBucket;
+    Bucket_P(){
+        this->size = 0;
+        this->nextBucket = -1;
+    }
+    void showData(){
+        for(int i = 0; i < size; i++){
+            elements[i].showData();
         }
-        void showDataP(){
-            for(int i = 0; i < size; i++){
-                player[i].showData();
-            }
-        }
-        ~Bucket_P(){}
+    }
+    ~Bucket_P(){}
 };
 
 

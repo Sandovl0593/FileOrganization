@@ -86,19 +86,63 @@ public:
                 _from_year = to_string(from_year),
                 _to_year = to_string(to_year);
 
-               
+
         vector<string> values = {_id, _name, _birthdate, _school, _country, _height, _weight, _season_exp,
-           _jersey, _position, _team_id, _team_name, _team_abbreviation, _team_city, _from_year, _to_year};
+                                 _jersey, _position, _team_id, _team_name, _team_abbreviation, _team_city, _from_year, _to_year};
 
         if (!all) for (int i: pos_atributes) {
-            result.push_back(values[i]);
-            return result;
-        }
+                result.push_back(values[i]);
+                return result;
+            }
         return values;
     }
+
     bool operator==(const Player& other) const {
         return id == other.id;  // Comparación de atributos relevantes
     }
+
+    Player& operator=(const Player& other) {
+        if (this != &other) { // Evitar autoasignación
+            this->weight = other.weight;
+            this->season_exp = other.season_exp;
+            this->from_year = other.from_year;
+            this->to_year = other.to_year;
+            this->id = other.id;
+            this->team_id = other.team_id;
+
+            strncpy(this->name, other.name, sizeof(this->name) - 1);
+            name[sizeof(name) - 1] = '\0';
+
+            strncpy(this->birthdate, other.birthdate, sizeof(this->birthdate) - 1);
+            birthdate[sizeof(birthdate) - 1] = '\0';
+
+            strncpy(this->school, other.school, sizeof(this->school) - 1);
+            school[sizeof(school) - 1] = '\0';
+
+            strncpy(this->country, other.country, sizeof(this->country) - 1);
+            country[sizeof(country) - 1] = '\0';
+
+            strncpy(this->height, other.height, sizeof(this->height) - 1);
+            height[sizeof(height) - 1] = '\0';
+
+            strncpy(this->jersey, other.jersey, sizeof(this->jersey) - 1);
+            jersey[sizeof(jersey) - 1] = '\0';
+
+            strncpy(this->position, other.position, sizeof(this->position) - 1);
+            position[sizeof(position) - 1] = '\0';
+
+            strncpy(this->team_name, other.team_name, sizeof(this->team_name) - 1);
+            team_name[sizeof(team_name) - 1] = '\0';
+
+            strncpy(this->team_abbreviation, other.team_abbreviation, sizeof(this->team_abbreviation) - 1);
+            team_abbreviation[sizeof(team_abbreviation) - 1] = '\0';
+
+            strncpy(this->team_city, other.team_city, sizeof(this->team_city) - 1);
+            team_city[sizeof(team_city) - 1] = '\0';
+        }
+        return *this;
+    }
+
 };
 
 
@@ -177,9 +221,9 @@ public:
                 _plus_minus_away = to_string(plus_minus_away),
                 _season_type = season_type;
 
-               
+
         vector<string> values = {_season_id, _team_id_home, _team_abbreviation_home, _team_name_home, _id,  _game_date, _matchup_home, _pts_home, _plus_minus_home,
-         _team_id_away, _team_abbreviation_away, _team_name_away, _matchup_away, _pts_away, _plus_minus_away, _season_type};
+                                 _team_id_away, _team_abbreviation_away, _team_name_away, _matchup_away, _pts_away, _plus_minus_away, _season_type};
 
         // for (auto i: values) cout << " " << i;
         // cout << endl;
@@ -193,6 +237,44 @@ public:
     }
     bool operator==(const Game& other) const {
         return id == other.id;  // Comparación de atributos relevantes
+    }
+
+    Game& operator=(const Game& other) {
+        if (this != &other) { // Evitar autoasignación
+            this->pts_home = other.pts_home;
+            this->plus_minus_home = other.plus_minus_home;
+            this->pts_away = other.pts_away;
+            this->plus_minus_away = other.plus_minus_away;
+            this->season_id = other.season_id;
+            this->team_id_home = other.team_id_home;
+            this->id = other.id;
+            this->team_id_away = other.team_id_away;
+
+            strncpy(this->team_abbreviation_home, other.team_abbreviation_home, sizeof(this->team_abbreviation_home) - 1);
+            team_abbreviation_home[sizeof(team_abbreviation_home) - 1] = '\0';
+
+            strncpy(this->team_name_home, other.team_name_home, sizeof(this->team_name_home) - 1);
+            team_name_home[sizeof(team_name_home) - 1] = '\0';
+
+            strncpy(this->game_date, other.game_date, sizeof(this->game_date) - 1);
+            game_date[sizeof(game_date) - 1] = '\0';
+
+            strncpy(this->matchup_home, other.matchup_home, sizeof(this->matchup_home) - 1);
+            matchup_home[sizeof(matchup_home) - 1] = '\0';
+
+            strncpy(this->team_abbreviation_away, other.team_abbreviation_away, sizeof(this->team_abbreviation_away) - 1);
+            team_abbreviation_away[sizeof(team_abbreviation_away) - 1] = '\0';
+
+            strncpy(this->team_name_away, other.team_name_away, sizeof(this->team_name_away) - 1);
+            team_name_away[sizeof(team_name_away) - 1] = '\0';
+
+            strncpy(this->matchup_away, other.matchup_away, sizeof(this->matchup_away) - 1);
+            matchup_away[sizeof(matchup_away) - 1] = '\0';
+
+            strncpy(this->season_type, other.season_type, sizeof(this->season_type) - 1);
+            season_type[sizeof(season_type) - 1] = '\0';
+        }
+        return *this;
     }
 };
 #endif //FILEORGANIZATION_RECORD_H
