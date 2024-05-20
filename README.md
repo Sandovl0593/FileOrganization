@@ -335,10 +335,5 @@ La extracción de los valores se basa en lo siguiente:
 
 ### Video Explicativo:
 
-[Link del Video](https://drive.google.com/file/d/1T8S1XUJBudsWqLWfm1t5l9rvNHKbVprp/view?usp=sharing
+[Link del Video (subido en Drive)](https://drive.google.com/file/d/1T8S1XUJBudsWqLWfm1t5l9rvNHKbVprp/view?usp=sharing
 )
-
-
-
-
-<a href="#top">Back to top 🔼</a>
